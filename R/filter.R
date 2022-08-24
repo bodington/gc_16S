@@ -33,7 +33,7 @@ dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 seqtab <- makeSequenceTable(mergers)
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
-saveRDS(seqtab.nochim, file = "./02_output/seqtab.Rdata")
+saveRDS(seqtab.nochim, file = "./02_output/seqtab.Rds")
 getN <- function(x) sum(getUniques(x))
 track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
 # If processing a single sample, remove the sapply calls
