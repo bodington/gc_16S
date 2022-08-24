@@ -1,0 +1,82 @@
+---
+title: "Soil GC Fractions Community Diversity"
+author: "Dylan Bodington"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    code_folding: hide
+    fig_caption: true
+    
+citation_package: bibtex
+bibliography: bib.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2); theme_set(theme_light())
+library(ggpubr)
+library(tidyr)
+library(dplyr)
+library(phyloseq)
+library(speedyseq)
+#library(phyloniche)
+#library(metagMisc)
+#library(devtools)
+```
+
+## Introduction
+
+After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA. [This script](https://github.com/bodington/sponge/blob/main/R/phyloseq_taxonomy_imputation.R) modifies the tax table of a phyloseq object to replace NA with the lowest assigned level + "_unidentified" eg "Bacteria, Cyanobacteria, Cyanobacteria_unidentified"
+
+
+```{r ps_objects, warning=FALSE}
+readRDS('./02_output/phyloseq.Rds')
+
+source("./R/phyloseq_taxonomy_imputation.R")  #Replacing NA in taxonomy assignment with the lowest level of assignment
+
+ps_16S <- phyloseq_taxonomy_imputation(ps)
+
+#Merging all samples of each host
+#ps_16S_merged <- merge_samples(ps_16S, "host")
+
+
+# Removing low abundance (<0.001% rel abund) ASVs
+ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
+```
+
+## Alpha Diversity
+
+The [Shannon Diversity Index](https://en.wikipedia.org/wiki/Diversity_index) of the communities in each sponge host were estimated using the 16S gene. The host communities were ordered from low to high diversity, and this order and colour scheme was used to maintain consistency for later analyses. The shape indicates the [microbial abundance](https://pubmed.ncbi.nlm.nih.gov/15825640/) of the host .
+
+```{r shannon_16S, fig.height=5, fig.width=10}
+shannon_16S_plot <- plot_richness(ps_16S, x = 'sample', color = 'sample', shape = 'soil', title = "", measures = 'Shannon', sortby = 'Shannon') +
+  geom_point(
+    aes(
+      colour = sample()
+    ), 
+    size = 3
+  ) +
+#  scale_colour_gradient2() +
+  guides(
+    colour = "none"
+  ) +
+  labs(
+    title = "Diversity of Whole Microbiome (16S)",
+    shape = "Microbial Abundance",
+    x = "Sample",
+    y = "Shannon Diversity Index"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = -30,
+                               face = "italic"
+                  ),
+    strip.text = element_blank(
+    )
+  ) +
+  ylim(0, 6.2)
+#shannon_16S_plot$data$ma <- factor(shannon_16S_plot$data$ma, levels = ma_order)
+shannon_16S_plot
+```
