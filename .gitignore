@@ -47,3 +47,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+#
+*~
+/01_data/00_input
+/01_data/02_trimmed
+/01_data/03_filtered
