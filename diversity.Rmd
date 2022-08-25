@@ -23,7 +23,7 @@ library(dplyr)
 library(phyloseq)
 library(speedyseq)
 #library(phyloniche)
-#library(metagMisc)
+library(metagMisc)
 #library(devtools)
 ```
 
@@ -33,17 +33,17 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 
 
 ```{r ps_objects, warning=FALSE}
-readRDS('./02_output/phyloseq.Rds')
+ps_16S <- readRDS('./02_output/phyloseq.Rds')
 
 source("./R/phyloseq_taxonomy_imputation.R")  #Replacing NA in taxonomy assignment with the lowest level of assignment
 
-ps_16S <- phyloseq_taxonomy_imputation(ps)
+ps_16S <- phyloseq_taxonomy_imputation(ps_16S)
 
 #Merging all samples of each host
 #ps_16S_merged <- merge_samples(ps_16S, "host")
 
 
-# Removing low abundance (<0.001% rel abund) ASVs
+# Removing low abundance (<0.001% rel abund) ASVs. Uses functions from metagMisc
 ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
 ```
 
@@ -52,10 +52,10 @@ ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
 The [Shannon Diversity Index](https://en.wikipedia.org/wiki/Diversity_index) of the communities in each sponge host were estimated using the 16S gene. The host communities were ordered from low to high diversity, and this order and colour scheme was used to maintain consistency for later analyses. The shape indicates the [microbial abundance](https://pubmed.ncbi.nlm.nih.gov/15825640/) of the host .
 
 ```{r shannon_16S, fig.height=5, fig.width=10}
-shannon_16S_plot <- plot_richness(ps_16S, x = 'sample', color = 'sample', shape = 'soil', title = "", measures = 'Shannon', sortby = 'Shannon') +
+shannon_16S_plot <- plot_richness(ps_16S, x = 'sample', color = 'soil', measures=c("Shannon"), title = "") +
   geom_point(
     aes(
-      colour = sample()
+      colour = soil
     ), 
     size = 3
   ) +
@@ -71,12 +71,30 @@ shannon_16S_plot <- plot_richness(ps_16S, x = 'sample', color = 'sample', shape 
   ) +
   theme(
     axis.text.x = element_text(angle = -30,
-                               face = "italic"
                   ),
     strip.text = element_blank(
     )
-  ) +
-  ylim(0, 6.2)
+  )
+  #ylim(0, 6.2)
 #shannon_16S_plot$data$ma <- factor(shannon_16S_plot$data$ma, levels = ma_order)
 shannon_16S_plot
+```
+
+## Community Composition
+
+When displaying the taxonomic makeup of the communities at phylum level, I split Pseudomonadota into classes. This should be done on a copy of the phyloseq object, which was already created in the previous step.
+
+```{r proteobacteria_phylum, warning=FALSE}
+ps_16S_proteo <- ps_16S
+
+plot.tax = as.data.frame(tax_table(ps_16S))
+plot.tax = data.frame(lapply(plot.tax, as.character), stringsAsFactors = F)
+plot.tax$Phylum[plot.tax$Phylum=="Proteobacteria"] = plot.tax$Class[plot.tax$Phylum=="Proteobacteria"] 
+plot.tax[] = lapply(plot.tax, factor)
+plot.tax.table = tax_table(plot.tax)
+rownames(plot.tax.table) = rownames(tax_table(ps_16S))
+colnames(plot.tax.table) = colnames(tax_table(ps_16S))
+
+tax_table(ps_16S_proteo) = plot.tax.table
+rm(list = c("plot.tax" , "plot.tax.table"))
 ```
