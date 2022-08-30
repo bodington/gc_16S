@@ -30,7 +30,7 @@ mkdir -p 02_output
 
 #for f in $inputdir/*$fabb*; do trim_galore --fastqc -a X --clip_R1 19 --clip_R2 20 -q 20 -o 01_data/02_trimmed --paired $f ${f/$fabb/$rabb}; mv 01_data/02_trimmed/*fastqc* 01_data/01_fastqc/02_trimmed/; mv 01_data/02_trimmed/*report* 01_data/01_fastqc/02_trimmed/; done
 
-Rscript R/filter.R $fabb $rabb
+#Rscript R/filter.R $fabb $rabb
 
 Rscript R/phyloseq.R
 
