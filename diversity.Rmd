@@ -50,10 +50,8 @@ ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
 
 ## Alpha Diversity
 
-The [Shannon Diversity Index](https://en.wikipedia.org/wiki/Diversity_index) of the communities in each sponge host were estimated using the 16S gene. The host communities were ordered from low to high diversity, and this order and colour scheme was used to maintain consistency for later analyses. The shape indicates the [microbial abundance](https://pubmed.ncbi.nlm.nih.gov/15825640/) of the host .
-
 ```{r shannon_16S, fig.height=5, fig.width=10}
-shannon_16S_plot <- plot_richness(ps_16S, x = 'name', color = 'soil', measures=c("Shannon"), title = "", sortby = ) +
+shannon_16S_plot <- plot_richness(ps_16S, x = 'name', color = 'soil', measures=c("Shannon"), title = "") +
   geom_point(
     aes(
       colour = soil
@@ -102,7 +100,6 @@ rm(list = c("plot.tax" , "plot.tax.table"))
 
 ```{r phylum_relabund, fig.height=8, fig.width=12}
 ps <- tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified")
-#ps <- merge_samples2(ps, "host", funs = list())
 ps <- transform_sample_counts(ps, function(x) x / sum(x))
 ps <- phyloseq_filter_top_taxa(ps, n = 20)
 
@@ -121,12 +118,16 @@ taxa_16S_plot <- plot_bar(ps, x = "name", fill="Phylum") +
   ) +
   theme(
     axis.text.x = element_text(
-      angle = -30,
-      face = "italic"
+      angle = -30
     )
   ) +
- scale_fill_manual(
-    values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588"))
+  scale_fill_manual(
+    values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588")
+  )
+#  facet_wrap(
+#    ~source,
+#    scales="free_x"
+#  )
 taxa_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
 taxa_16S_plot
 ```
