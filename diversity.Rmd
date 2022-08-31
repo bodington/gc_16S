@@ -18,6 +18,7 @@ link-citations: true
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2); theme_set(theme_light())
 library(ggpubr)
+library(ggsci)
 library(tidyr)
 library(stringr)
 library(dplyr)
@@ -50,31 +51,41 @@ ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
 
 ## Alpha Diversity
 
-```{r shannon_16S, fig.height=5, fig.width=10}
-shannon_16S_plot <- plot_richness(ps_16S, x = 'name', color = 'soil', measures=c("Shannon"), title = "") +
+```{r shannon_16S, fig.height=7, fig.width=10}
+shannon_16S <- estimate_richness(
+  ps_16S, measures = c(
+    "Shannon", "Simpson"
+    )
+  )
+shannon_16S_plot <- plot_richness(
+  ps_16S,
+  x = 'name',
+  color = 'soil',
+  measures=c(
+    "Shannon",
+    "Simpson"
+    ),
+  title = "",
+  nrow = 2
+  ) +
   geom_point(
     aes(
       colour = soil
     ), 
     size = 3
   ) +
-#  scale_colour_gradient2() +
+  scale_color_npg(
+  ) +
   guides(
     colour = "none"
   ) +
   labs(
-    title = "Diversity of Whole Microbiome (16S)",
-    shape = "Microbial Abundance",
-    x = "Sample",
-    y = "Shannon Diversity Index"
   ) +
   theme(
     axis.text.x = element_text(angle = -30,
-                  ),
-    strip.text = element_blank(
-    )
+                  )
   )
-  #ylim(0, 6.2)
+#  ylim(0, 8)
 shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
 shannon_16S_plot
 ```
@@ -121,13 +132,18 @@ taxa_16S_plot <- plot_bar(ps, x = "name", fill="Phylum") +
       angle = -30
     )
   ) +
+#  scale_fill_npg(
   scale_fill_manual(
     values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588")
+  ) +
+#  geom_line(
+#    aes(x = name, )
+#  ) +
+  facet_wrap(
+    ~soil,
+    scales="free_x"
   )
-#  facet_wrap(
-#    ~source,
-#    scales="free_x"
-#  )
-taxa_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
+taxa_16S_plot$data$name <- factor(taxa_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
+taxa_16S_plot$data$soil <- factor(taxa_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
 taxa_16S_plot
 ```
