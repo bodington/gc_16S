@@ -20,7 +20,7 @@ Running FastQC on the data once trimming has completed
 This is cutadapt 4.1 with Python 3.9.12
 Command line parameters: -j 1 -e 0.1 -q 20 -O 1 -a X 01_data/00_input/4_5_R2.fastq
 Processing single-end reads on 1 core ...
-Finished in 1.04 s (13 µs/read; 4.72 M reads/minute).
+Finished in 0.66 s (8 µs/read; 7.43 M reads/minute).
 
 === Summary ===
 
