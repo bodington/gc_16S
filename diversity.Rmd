@@ -41,10 +41,6 @@ source("./R/phyloseq_taxonomy_imputation.R")  #Replacing NA in taxonomy assignme
 
 ps_16S <- phyloseq_taxonomy_imputation(ps_16S)
 
-#Merging all samples of each host
-#ps_16S_merged <- merge_samples(ps_16S, "host")
-
-
 # Removing low abundance (<0.001% rel abund) ASVs. Uses functions from metagMisc
 ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
 ```
