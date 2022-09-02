@@ -8,7 +8,7 @@ seqtab.nochim <- readRDS(file = "./02_output/seqtab.Rds")
 taxa <- assignTaxonomy(seqtab.nochim, "/uoa/scratch/shared/Soil_Microbiology_Group/Public_databases/silva_nr99_v138.1_train_set.fa.gz", multithread=TRUE)
 taxa <- addSpecies(taxa, "/uoa/scratch/shared/Soil_Microbiology_Group/Public_databases/silva_species_assignment_v138.1.fa.gz")
 samples.out <- rownames(seqtab.nochim)
-samdf <- read.csv("./00_ref/gc_phyloseq_metadata.csv")
+samdf <- read.csv("./00_ref/gc_phyloseq_metadata_test.csv")
 rownames(samdf) <- samples.out
 ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), sample_data(samdf), tax_table(taxa))
 dna <- Biostrings::DNAStringSet(taxa_names(ps))
