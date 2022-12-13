@@ -31,7 +31,7 @@ library(metagMisc)
 
 ## Introduction
 
-After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA. [This script](https://github.com/bodington/sponge/blob/main/R/phyloseq_taxonomy_imputation.R) modifies the tax table of a phyloseq object to replace NA with the lowest assigned level + "_unidentified" eg "Bacteria, Cyanobacteria, Cyanobacteria_unidentified"
+After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA. [This script](https://github.com/bodington/gc_16S/blob/main/R/phyloseq_taxonomy_imputation.R) modifies the tax table of a phyloseq object to replace NA with the lowest assigned level + "_unidentified" eg "Bacteria, Cyanobacteria, Cyanobacteria_unidentified"
 
 
 ```{r ps_objects, warning=FALSE}
@@ -106,15 +106,17 @@ rm(list = c("plot.tax" , "plot.tax.table"))
 ```
 
 ```{r phylum_relabund, fig.height=8, fig.width=12}
-ps <- tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified")
-ps <- transform_sample_counts(ps, function(x) x / sum(x))
-ps <- phyloseq_filter_top_taxa(ps, n = 20)
+
+ps <- ps_16S_proteo %>% 
+  tax_glom(taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
+  transform_sample_counts(function(x) x / sum(x))
+#  phyloseq_filter_top_taxa(n = 20)
 
 write.table(ps %>%
               psmelt() %>%
               select(Phylum, Sample, Abundance) %>%
-              spread(Sample, Abundance),
-	file = "./02_output/ps_16S.relative_abundance.clade.csv", sep = ",", quote = F, row.names = F, col.names = T)
+              spread(Sample, Abundance), file = "./02_output/ps_16S.relative_abundance.clade.csv", sep = ",", quote = F, row.names = F, col.names = T
+            )
 
 taxa_16S_plot <- plot_bar(ps, x = "name", fill="Phylum") +
   labs(
@@ -129,9 +131,9 @@ taxa_16S_plot <- plot_bar(ps, x = "name", fill="Phylum") +
     )
   ) +
 #  scale_fill_npg(
-  scale_fill_manual(
-    values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588")
-  ) +
+#  scale_fill_manual(
+#    values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588")
+#  ) +
 #  geom_line(
 #    aes(x = name, )
 #  ) +
