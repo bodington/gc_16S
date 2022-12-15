@@ -50,8 +50,6 @@ sample_data(ps_16S)$labels <- read.csv(file = "00_ref/axis.labels.csv")[, c(13)]
 ## Alpha Diversity
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
-sample_data(ps_16S)$shannon <- estimate_richness(ps_16S, measures = c("Shannon"))
-
 shannon_16S_plot <- plot_richness(ps_16S,
                                   x = "name",
                                   color = "soil",
@@ -63,7 +61,7 @@ shannon_16S_plot
 ```
 
 ```{r shannon_16S, fig.height=4, fig.width=12}
-sample_data(ps_16S)$shannon <- estimate_richness(ps_16S, measures = c("Shannon"))
+ps_16S <- ps_filter(ps_16S, !(labels %in% c("Total", "Total 2", "Total 3")))
 
 shannon_16S_plot <- plot_richness(ps_16S,
                                   x = 'name',
@@ -117,7 +115,7 @@ write.table(tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_un
 ps <- ps_16S_proteo %>%
   transform_sample_counts(function(x) x / sum(x)) %>%
   tax_glom(taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
-  aggregate_rare("Phylum", detection = 0.05, prevalence = 0.1) %>%
+  aggregate_rare("Phylum", detection = 0.1, prevalence = 0.1) %>%
   transform_sample_counts(function(x) x * 100)
 
 taxa_16S_plot <- plot_bar(ps,
