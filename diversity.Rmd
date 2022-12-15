@@ -23,10 +23,13 @@ library(tidyr)
 library(stringr)
 library(dplyr)
 library(phyloseq)
+library(microbiome)
 library(speedyseq)
-#library(phyloniche)
+library(microViz)
 library(metagMisc)
+
 #library(devtools)
+#source("./R/phyloseq_taxonomy_imputation.R")
 ```
 
 ## Introduction
@@ -34,67 +37,47 @@ library(metagMisc)
 After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA. [This script](https://github.com/bodington/gc_16S/blob/main/R/phyloseq_taxonomy_imputation.R) modifies the tax table of a phyloseq object to replace NA with the lowest assigned level + "_unidentified" eg "Bacteria, Cyanobacteria, Cyanobacteria_unidentified"
 
 
-```{r ps_objects, warning=FALSE}
-ps_16S <- readRDS('./02_output/phyloseq.Rds')
+```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
+ps_16S <- readRDS('./02_output/phyloseq.Rds') %>%
+  ps_arrange(source, fraction) %>%
+  tax_fix()
+#  phyloseq_taxonomy_imputation()
+#  phyloseq_filter_taxa_rel_abund(frac = 0.00001)
 
-source("./R/phyloseq_taxonomy_imputation.R")  #Replacing NA in taxonomy assignment with the lowest level of assignment
-
-ps_16S <- phyloseq_taxonomy_imputation(ps_16S)
-
-# Removing low abundance (<0.001% rel abund) ASVs. Uses functions from metagMisc
-ps_16S_abund <- phyloseq_filter_taxa_rel_abund(ps_16S, frac = 0.00001)
+sample_data(ps_16S)$labels <- read.csv(file = "00_ref/axis.labels.csv")[, c(13)]
 ```
 
 ## Alpha Diversity
 
-```{r shannon_16S, fig.height=7, fig.width=10}
-shannon_16S <- estimate_richness(
-  ps_16S, measures = c(
-    "Shannon", "Simpson"
-    )
-  )
-shannon_16S_plot <- plot_richness(
-  ps_16S,
-  x = 'name',
-  color = 'soil',
-  measures=c(
-    "Shannon",
-    "Simpson"
-    ),
-  title = "",
-  nrow = 2
-  ) +
-  geom_point(
-    aes(
-      colour = soil
-    ), 
-    size = 3
-  ) +
-  scale_color_npg(
-  ) +
-  guides(
-    colour = "none"
-  ) +
-  labs(
-  ) +
-  theme(
-    axis.text.x = element_text(angle = -30,
-                  )
-  )
-#  ylim(0, 8)
+```{r shannon_16S, fig.height=4, fig.width=12}
+sample_data(ps_16S)$shannon <- estimate_richness(ps_16S, measures = c("Shannon"))
+
+shannon_16S_plot <- plot_richness(ps_16S,
+                                  x = 'name',
+                                  measures=c("Shannon"),
+                                  title = "Shannon Diversity of Soil Community Fractions") +
+  facet_wrap(~soil,
+             ncol = 4,
+             scales="free_x") +
+  scale_color_npg() +
+  guides(colour = "none") +
+  labs(x = "Sample",
+       y = "Shannon Diversity") +
+  theme(axis.text.x = element_text(angle = -90)) +
+  scale_x_discrete(labels = c(sample_data(ps_16S)$labels))
 shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
+shannon_16S_plot$data$soil <- factor(shannon_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
 shannon_16S_plot
 ```
 
 ## Community Composition
 
-When displaying the taxonomic makeup of the communities at phylum level, I split Pseudomonadota into classes. This should be done on a copy of the phyloseq object, which was already created in the previous step.
-
+When displaying the taxonomic makeup of the communities at phylum level, I split Pseudomonadota into classes.
 ```{r proteobacteria_phylum, warning=FALSE}
 ps_16S_proteo <- ps_16S
 
-plot.tax = as.data.frame(tax_table(ps_16S))
-plot.tax = data.frame(lapply(plot.tax, as.character), stringsAsFactors = F)
+plot.tax <- as.data.frame(tax_table(ps_16S))
+plot.tax <-  data.frame(lapply(plot.tax, as.character), stringsAsFactors = F)
 plot.tax$Phylum[plot.tax$Phylum=="Proteobacteria"] = plot.tax$Class[plot.tax$Phylum=="Proteobacteria"] 
 plot.tax[] = lapply(plot.tax, factor)
 plot.tax.table = tax_table(plot.tax)
@@ -105,43 +88,52 @@ tax_table(ps_16S_proteo) = plot.tax.table
 rm(list = c("plot.tax" , "plot.tax.table"))
 ```
 
-```{r phylum_relabund, fig.height=8, fig.width=12}
-
-ps <- ps_16S_proteo %>% 
-  tax_glom(taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
-  transform_sample_counts(function(x) x / sum(x))
-#  phyloseq_filter_top_taxa(n = 20)
-
-write.table(ps %>%
+```{r phylum_relabund, fig.height=6, fig.width=20}
+write.table(tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
               psmelt() %>%
               select(Phylum, Sample, Abundance) %>%
-              spread(Sample, Abundance), file = "./02_output/ps_16S.relative_abundance.clade.csv", sep = ",", quote = F, row.names = F, col.names = T
+              spread(Sample, Abundance),
+            file = "./02_output/ps_16S.relative_abundance.phylum.csv",
+            sep = ",",
+            quote = F,
+            row.names = F,
+            col.names = T
             )
 
-taxa_16S_plot <- plot_bar(ps, x = "name", fill="Phylum") +
-  labs(
-    title = "Community Composition (16S)",
-    fill = "Phylum",
-    x = "Sample",
-    y = "Relative Abundance"
-  ) +
-  theme(
-    axis.text.x = element_text(
-      angle = -30
-    )
-  ) +
-#  scale_fill_npg(
-#  scale_fill_manual(
-#    values = c("#89C5DA", "#DA5724", "#74D944", "#CE50CA", "#3F4921", "#C0717C", "#7FDCC0", "#5F7FC7", "#673770", "#D3D93E", "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", "#D14285", "#6DDE88", "#652926", "#CBD588")
-#  ) +
-#  geom_line(
-#    aes(x = name, )
-#  ) +
-  facet_wrap(
-    ~soil,
-    scales="free_x"
-  )
+ps <- ps_16S_proteo %>%
+  transform_sample_counts(function(x) x / sum(x)) %>%
+  tax_glom(taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
+  aggregate_rare("Phylum", detection = 0.05, prevalence = 0.1) %>%
+  transform_sample_counts(function(x) x * 100)
+
+taxa_16S_plot <- plot_bar(ps,
+                          x = "name", 
+                          fill="Phylum",
+                          title = "Community Structure of Soil Community Fractions") +
+  facet_wrap(~soil,
+             ncol = 4,
+             scales="free_x") +
+  labs(fill = "Phylum",
+       y = "Relative Abundance") +
+  theme() +
+  scale_x_discrete(labels = c(sample_data(ps_16S)$labels)) +
+  scale_fill_npg() +
+  guides(fill = guide_legend(ncol = 1))
 taxa_16S_plot$data$name <- factor(taxa_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
 taxa_16S_plot$data$soil <- factor(taxa_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
+taxa_16S_plot$layers[[1]]$geom_params$width <- 1
 taxa_16S_plot
+```
+
+```{r pub_fig_1, fig.height=12, fig.width=12}
+zp1 <- shannon_16S_plot +
+  theme(axis.text.x = element_blank(),
+        axis.title = element_blank())
+zp2 <- taxa_16S_plot +
+  theme(title = element_blank(),
+        strip.text.x = element_blank())
+ggarrange(zp1, zp2,
+          nrow = 2,
+          legend = "bottom",
+          align = "v")
 ```
