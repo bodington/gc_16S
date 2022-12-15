@@ -49,6 +49,19 @@ sample_data(ps_16S)$labels <- read.csv(file = "00_ref/axis.labels.csv")[, c(13)]
 
 ## Alpha Diversity
 
+```{r alpha_16S, fig.height=8, fig.width=12}
+sample_data(ps_16S)$shannon <- estimate_richness(ps_16S, measures = c("Shannon"))
+
+shannon_16S_plot <- plot_richness(ps_16S,
+                                  x = "name",
+                                  color = "soil",
+                                  nrow = 4) +
+  scale_x_discrete(labels = c(sample_data(ps_16S)$labels))
+shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
+shannon_16S_plot$data$soil <- factor(shannon_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
+shannon_16S_plot
+```
+
 ```{r shannon_16S, fig.height=4, fig.width=12}
 sample_data(ps_16S)$shannon <- estimate_richness(ps_16S, measures = c("Shannon"))
 
@@ -73,6 +86,7 @@ shannon_16S_plot
 ## Community Composition
 
 When displaying the taxonomic makeup of the communities at phylum level, I split Pseudomonadota into classes.
+
 ```{r proteobacteria_phylum, warning=FALSE}
 ps_16S_proteo <- ps_16S
 
@@ -123,6 +137,14 @@ taxa_16S_plot$data$soil <- factor(taxa_16S_plot$data$soil, levels = c("Craibston
 taxa_16S_plot$layers[[1]]$geom_params$width <- 1
 taxa_16S_plot
 ```
+
+Filler
+
+## Plots for publication
+
+Download links below plot
+
+### Fig 1
 
 ```{r pub_fig_1, fig.height=6, fig.width=12}
 zp1 <- shannon_16S_plot +
