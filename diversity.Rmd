@@ -2,7 +2,7 @@
 title: "Soil GC Fractions Community Diversity"
 author: "Dylan Bodington"
 date: "`r Sys.Date()`"
-output:
+out:
   html_document:
     toc: true
     toc_depth: 2
@@ -38,7 +38,7 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
-ps_16S <- readRDS('./02_output/phyloseq.Rds') %>%
+ps_16S <- readRDS('./02_out/phyloseq.Rds') %>%
   ps_arrange(source, fraction) %>%
   tax_fix()
 #  phyloseq_taxonomy_imputation()
@@ -93,7 +93,7 @@ write.table(tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_un
               psmelt() %>%
               select(Phylum, Sample, Abundance) %>%
               spread(Sample, Abundance),
-            file = "./02_output/ps_16S.relative_abundance.phylum.csv",
+            file = "./02_out/ps_16S.relative_abundance.phylum.csv",
             sep = ",",
             quote = F,
             row.names = F,
@@ -151,3 +151,5 @@ zp <- ggarrange(zp1, zp2,
 zp
 ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png")
 ```
+
+[Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)
