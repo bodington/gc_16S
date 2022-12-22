@@ -45,7 +45,6 @@ ps_16S <- readRDS('./02_out/phyloseq.Rds') %>%
 #  phyloseq_filter_taxa_rel_abund(frac = 0.00001)
 
 sample_data(ps_16S)$labels <- read.csv(file = "00_ref/axis.labels.csv")[, c(13)]
-phylum_levels <- append(levels(factor(tax_table(ps_16S)[,"Phylum"])), "Other")
 ```
 
 ## Alpha Diversity
@@ -59,6 +58,10 @@ shannon_16S_plot <- plot_richness(ps_16S,
 shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
 shannon_16S_plot$data$soil <- factor(shannon_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
 shannon_16S_plot
+```
+```{r}
+ordcap = ordinate(ps_filter(ps_16S, GC != "NA"), "CAP", "bray", ~GC)
+plot_ordination(ps_16S, ordcap, "samples", color="soil")
 ```
 
 ```{r shannon_16S, fig.height=4, fig.width=12}
@@ -97,6 +100,7 @@ rownames(plot.tax.table) = rownames(tax_table(ps_16S))
 colnames(plot.tax.table) = colnames(tax_table(ps_16S))
 
 tax_table(ps_16S_proteo) = plot.tax.table
+phylum_levels <- append(levels(factor(tax_table(ps_16S_proteo)[,"Phylum"])), "Other")
 rm(list = c("plot.tax" , "plot.tax.table"))
 ```
 
@@ -132,7 +136,7 @@ taxa_16S_plot <- plot_bar(ps,
   guides(fill = guide_legend(ncol = 1))
 taxa_16S_plot$data$name <- factor(taxa_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
 taxa_16S_plot$data$soil <- factor(taxa_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
-taxa_16S_plot$data$Phylum <- factor(taxa_16S_plot$data$Phylum, levels = append(levels(factor(tax_table(ps_16S_proteo)[,"Phylum"])), "Other"))
+taxa_16S_plot$data$Phylum <- factor(taxa_16S_plot$data$Phylum, levels = phylum_levels)
 taxa_16S_plot$layers[[1]]$geom_params$width <- 1
 taxa_16S_plot
 ```

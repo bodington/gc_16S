@@ -6,16 +6,19 @@ library(DECIPHER)
 library(Biostrings)
 
 nproc <- 4 # set to number of cpus/processors to use for the clustering
+cluster_cutoff <- 0.15 # use 0.15 for a 85% OTU
+
 asv_sequences <- colnames(seqtab_nochim)
 sample_names <- rownames(seqtab_nochim)
 dna <- Biostrings::DNAStringSet(asv_sequences)
 d <- DECIPHER::DistanceMatrix(aln, processors = nproc)
 aln <- DECIPHER::AlignSeqs(dna, processors = nproc)
 d <- DECIPHER::DistanceMatrix(aln, processors = nproc)
-clusters <- DECIPHER::IdClusters(
-  d, 
+clusters <- DECIPHER::TreeLine(
+  myDistMatrix=d, 
   method = "complete",
-  cutoff = 0.15, # use `cutoff = 0.15` for a 85% OTU 
+  cutoff = cluster_cutoff, 
+  type = "clusters",
   processors = nproc)
 clusters <- clusters %>%
   add_column(sequence = asv_sequences)
