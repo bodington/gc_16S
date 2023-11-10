@@ -43,33 +43,69 @@ ps_16S <- readRDS('./02_out/phyloseq.Rds') %>%
   tax_fix()
 #  phyloseq_taxonomy_imputation()
 #  phyloseq_filter_taxa_rel_abund(frac = 0.00001)
+#sample_data(ps_16S)$label <- read.csv(file = "00_ref/phyloseq_metadata.csv")[, c(13)]
+```
 
-sample_data(ps_16S)$labels <- read.csv(file = "00_ref/axis.labels.csv")[, c(13)]
+```{r import_mag,  message=FALSE, warning=FALSE, include=FALSE}
+tax_merge <- merge_phyloseq(tax_table(ps_16S),tax_table(as.matrix(read.table(file = "01_data/gc_mag_tax.csv", header = TRUE, sep = ",", row.names = 1))))
+sample_data_merge <- sample_data(read.table(file = "00_ref/phyloseq_metadata.csv", header = TRUE, sep = ",", row.names = 1))
+
+otu_mag <- otu_table(round(1000000 * as.matrix(read.table(file = "01_data/gc_mag_otu.csv", header = TRUE, sep = ",", row.names = 1))), taxa_are_rows = FALSE)
+otu_mag_merge_ps_16S <- otu_table(matrix(0, length(rownames(otu_mag)), ncol(otu_table(ps_16S)), dimname = list(rownames(otu_mag),colnames(otu_table(ps_16S)))), taxa_are_rows = FALSE)
+otu_ps_16S_merge_mag <- otu_table(matrix(0, length(rownames(otu_table(ps_16S))), ncol(otu_mag), dimname = list(rownames(otu_table(ps_16S)),colnames(otu_mag))), taxa_are_rows = FALSE)
+otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_16S), otu_mag_merge_ps_16S), merge_phyloseq(otu_ps_16S_merge_mag, otu_mag))
+
+ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge) %>%
+  ps_filter(!(label %in% c("Mixed", "Whole Replicate 2", "Whole Replicate 3"))) %>%
+  ps_arrange(source, fraction) %>%
+  tax_fix()
+
+labels <- append(append(sample_data(ps_merge)$label[!sample_data(ps_merge)$label %in% c("Whole", "Genome (MAG)")], "Whole", 0), "Genome (MAG)")
+sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
+sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
+sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = labels)
 ```
 
 ## Alpha Diversity
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
-shannon_16S_plot <- plot_richness(ps_16S,
-                                  x = "name",
-                                  color = "soil",
-                                  nrow = 4) +
-  scale_x_discrete(labels = c(sample_data(ps_16S)$labels))
-shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
-shannon_16S_plot$data$soil <- factor(shannon_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
-shannon_16S_plot
+otu_tab <- t(abundances(ps_16S))
+png("./02_out/rare.png")
+p <- vegan::rarecurve(otu_tab, 
+                      step = 50, label = FALSE, 
+                      sample = min(rowSums(otu_tab), 
+                                   col = "blue", cex = 0.6))
+dev.off()
+
+set.seed(90210)
+ps_16S_rare <- rarefy_even_depth(ps_16S, sample.size = 15000)
+
+alpha_16S <- alpha(ps_16S_rare, index = "all")
+rownames(alpha_16S) <- sample_data(ps_16S)$name
+alpha_16S$source <- sample_data(ps_16S)$soil
+alpha_16S$name <- sample_data(ps_16S)$label
+alpha_16S <- alpha_16S %>%
+  relocate(source, name, .before = observed)
+
+write.table(alpha_16S,
+            file = "./02_out/alpha_diversity.csv",
+            sep = ",",
+            quote = T,
+            row.names = T,
+            col.names = T
+            )
 ```
 ```{r}
 ordcap = ordinate(ps_filter(ps_16S, GC != "NA"), "CAP", "bray", ~GC)
 plot_ordination(ps_16S, ordcap, "samples", color="soil")
 ```
 
-```{r shannon_16S, fig.height=4, fig.width=12}
-ps_16S <- ps_filter(ps_16S, !(labels %in% c("Mixed", "Whole Replicate 2", "Whole Replicate 3")))
-shannon_16S_plot <- plot_richness(ps_16S,
-                                  x = 'name',
+```{r shannon, fig.height=4, fig.width=12}
+shannon_plot <- plot_richness(ps_merge,
+                                  x = 'label',
                                   measures=c("Shannon"),
                                   title = "Shannon Diversity of Soil Community Fractions") +
+  scale_x_discrete(labels = c(sample_data(ps_merge)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
@@ -77,11 +113,9 @@ shannon_16S_plot <- plot_richness(ps_16S,
   guides(colour = "none") +
   labs(x = "Sample",
        y = "Shannon Diversity") +
-  theme(axis.text.x = element_text(angle = -90)) +
-  scale_x_discrete(labels = c(sample_data(ps_16S)$labels))
-shannon_16S_plot$data$name <- factor(shannon_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
-shannon_16S_plot$data$soil <- factor(shannon_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
-shannon_16S_plot
+  theme(axis.text.x = element_text(angle = -90))
+  
+shannon_plot
 ```
 
 ## Community Composition
@@ -89,56 +123,55 @@ shannon_16S_plot
 When displaying the taxonomic makeup of the communities at phylum level, I split Pseudomonadota into classes.
 
 ```{r proteobacteria_phylum, warning=FALSE}
-ps_16S_proteo <- ps_16S
+ps_merge_proteo <- ps_merge
 
-plot.tax <- as.data.frame(tax_table(ps_16S))
+plot.tax <- as.data.frame(tax_table(ps_merge))
 plot.tax <-  data.frame(lapply(plot.tax, as.character), stringsAsFactors = F)
 plot.tax$Phylum[plot.tax$Phylum=="Proteobacteria"] = plot.tax$Class[plot.tax$Phylum=="Proteobacteria"] 
 plot.tax[] = lapply(plot.tax, factor)
 plot.tax.table = tax_table(plot.tax)
-rownames(plot.tax.table) = rownames(tax_table(ps_16S))
-colnames(plot.tax.table) = colnames(tax_table(ps_16S))
+rownames(plot.tax.table) = rownames(tax_table(ps_merge))
+colnames(plot.tax.table) = colnames(tax_table(ps_merge))
 
-tax_table(ps_16S_proteo) = plot.tax.table
-phylum_levels <- append(levels(factor(tax_table(ps_16S_proteo)[,"Phylum"])), "Other")
+tax_table(ps_merge_proteo) = plot.tax.table
+phylum_levels <- append(levels(factor(tax_table(ps_merge_proteo)[,"Phylum"])), "Other")
 rm(list = c("plot.tax" , "plot.tax.table"))
 ```
 
+
+
 ```{r phylum_relabund, fig.height=6, fig.width=20}
-write.table(tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
+write.table(tax_glom(ps_merge_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
               psmelt() %>%
               select(Phylum, Sample, Abundance) %>%
               spread(Sample, Abundance),
-            file = "./02_out/ps_16S.relative_abundance.phylum.csv",
+            file = "./02_out/ps_merge.relative_abundance.phylum.csv",
             sep = ",",
             quote = F,
             row.names = F,
             col.names = T
             )
 
-ps <- ps_16S_proteo %>%
+ps <- ps_merge_proteo %>%
   transform_sample_counts(function(x) x / sum(x)) %>%
   tax_glom(taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
   aggregate_rare("Phylum", detection = 0.05, prevalence = 0.05)
 #  transform_sample_counts(function(x) x * 100)
 
-taxa_16S_plot <- plot_bar(ps,
-                          x = "name", 
+taxa_plot <- plot_bar(ps,
+                          x = "label", 
                           fill="Phylum") +
+  #scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
   labs(fill = "Phylum",
        y = "Relative Abundance") +
   theme() +
-  scale_x_discrete(labels = c(sample_data(ps_16S)$labels)) +
-  scale_fill_simpsons()+
+  scale_fill_simpsons() +
   guides(fill = guide_legend(ncol = 1))
-taxa_16S_plot$data$name <- factor(taxa_16S_plot$data$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
-taxa_16S_plot$data$soil <- factor(taxa_16S_plot$data$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
-taxa_16S_plot$data$Phylum <- factor(taxa_16S_plot$data$Phylum, levels = phylum_levels)
-taxa_16S_plot$layers[[1]]$geom_params$width <- 1
-taxa_16S_plot
+taxa_plot$data$Phylum <- factor(taxa_plot$data$Phylum, levels = phylum_levels)
+taxa_plot$layers[[1]]$geom_params$width <- 1
 ```
 
 Filler
@@ -149,8 +182,8 @@ Download links below plot
 
 ### Fig 1
 
-```{r pub_fig_1, fig.height=6, fig.width=12}
-zp1 <- shannon_16S_plot +
+```{r pub_fig_1, fig.height=6, fig.width=13}
+zp1 <- shannon_plot +
   scale_y_continuous(limits = c(4.2, 6.8),
                      breaks = c(5, 6)) +
   labs(title = "Catchy Graph Title A",
@@ -161,20 +194,21 @@ zp1 <- shannon_16S_plot +
         axis.title.y = element_text(face = "italic"),
         strip.text = element_text(size = 12),
         plot.margin = unit(c(1,1,-0.1,1), "lines"))
-zp2 <- taxa_16S_plot +
+zp2 <- taxa_plot +
   guides(fill = guide_legend(nrow = 2)) +
   labs(x = "Sample",
        y = "Relative Abundance",
        legend = "Phylum") +
   theme(strip.text.x = element_blank(),
         legend.position = "bottom",
+        legend.spacing.x = unit(0.5, 'cm'),
         plot.margin = unit(c(-0.1,1,1,1), "lines"))
 zp <- ggarrange(zp1, zp2,
           nrow = 2,
           heights = c(0.22,1),
           align = "v")
 zp
-ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png")
+ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png", height = 6, width = 14)
 ```
 
 [Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)

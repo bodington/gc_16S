@@ -1,0 +1,19 @@
+---
+title: "Processing amoA amplicons from sequencing data"
+author: "Dylan Bodington"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    toc: yes
+    toc_depth: 2
+    code_folding: hide
+    fig_caption: yes
+citation_package: bibtex
+bibliography: bib.bib
+link-citations: yes
+---
+
+16S rRNA gene amplicon sequences were trimmed with TrimGalore [@krueger2021], a wrapper using CutAdapt [@EJ200] for trimming of sequencing primers and adapters and FastQC [@andrews2012] for quality control. Trimmed reads were merged and assigned to amplicon sequence variants (ASVs) using dada2[@callahan2016], with quality filtering and chimera removal using the default settings (Table S7). Taxonomy was assigned to ASVs in dada2 using the Silva rRNA database (SSU Ref NR 99 v138.1)[quast_silva_2012]. Community diversity (Table S8) and relative abundance (Table S9) of all sample replicates and fractions were calculated using phyloseq[@mcmurdie_phyloseq_2013]. 
