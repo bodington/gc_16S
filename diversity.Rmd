@@ -114,8 +114,6 @@ shannon_plot <- plot_richness(ps_merge,
   labs(x = "Sample",
        y = "Shannon Diversity") +
   theme(axis.text.x = element_text(angle = -90))
-  
-shannon_plot
 ```
 
 ## Community Composition
@@ -136,16 +134,30 @@ colnames(plot.tax.table) = colnames(tax_table(ps_merge))
 tax_table(ps_merge_proteo) = plot.tax.table
 phylum_levels <- append(levels(factor(tax_table(ps_merge_proteo)[,"Phylum"])), "Other")
 rm(list = c("plot.tax" , "plot.tax.table"))
+
+ps_16S_proteo <- ps_16S
+
+plot.tax <- as.data.frame(tax_table(ps_16S))
+plot.tax <-  data.frame(lapply(plot.tax, as.character), stringsAsFactors = F)
+plot.tax$Phylum[plot.tax$Phylum=="Proteobacteria"] = plot.tax$Class[plot.tax$Phylum=="Proteobacteria"] 
+plot.tax[] = lapply(plot.tax, factor)
+plot.tax.table = tax_table(plot.tax)
+rownames(plot.tax.table) = rownames(tax_table(ps_16S))
+colnames(plot.tax.table) = colnames(tax_table(ps_16S))
+
+tax_table(ps_16S_proteo) = plot.tax.table
+phylum_levels <- append(levels(factor(tax_table(ps_16S_proteo)[,"Phylum"])), "Other")
+rm(list = c("plot.tax" , "plot.tax.table"))
 ```
 
 
 
 ```{r phylum_relabund, fig.height=6, fig.width=20}
-write.table(tax_glom(ps_merge_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
+write.table(tax_glom(ps_16S_proteo, taxrank = "Phylum", bad_empty = "Bacteria_unidentified") %>%
               psmelt() %>%
               select(Phylum, Sample, Abundance) %>%
               spread(Sample, Abundance),
-            file = "./02_out/ps_merge.relative_abundance.phylum.csv",
+            file = "./02_out/ps_16S.relative_abundance.phylum.csv",
             sep = ",",
             quote = F,
             row.names = F,
@@ -205,10 +217,10 @@ zp2 <- taxa_plot +
         plot.margin = unit(c(-0.1,1,1,1), "lines"))
 zp <- ggarrange(zp1, zp2,
           nrow = 2,
-          heights = c(0.22,1),
+          heights = c(0.32,1),
           align = "v")
 zp
-ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png", height = 6, width = 14)
+ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png", height = 7, width = 14)
 ```
 
 [Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)
