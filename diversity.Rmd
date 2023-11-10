@@ -27,9 +27,7 @@ library(microbiome)
 library(speedyseq)
 library(microViz)
 library(metagMisc)
-
-#library(devtools)
-#source("./R/phyloseq_taxonomy_imputation.R")
+library(Biostrings)
 ```
 
 ## Introduction
@@ -41,9 +39,6 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 ps_16S <- readRDS('./02_out/phyloseq.Rds') %>%
   ps_arrange(source, fraction) %>%
   tax_fix()
-#  phyloseq_taxonomy_imputation()
-#  phyloseq_filter_taxa_rel_abund(frac = 0.00001)
-#sample_data(ps_16S)$label <- read.csv(file = "00_ref/phyloseq_metadata.csv")[, c(13)]
 ```
 
 ```{r import_mag,  message=FALSE, warning=FALSE, include=FALSE}

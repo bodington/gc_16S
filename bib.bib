@@ -4,12 +4,12 @@
                   Phil Ewels and
                   Ebrahim Afyounian and
                   Benjamin Schuster-Boeckler},
-  title        = {FelixKrueger/TrimGalore: v0.6.7 - DOI via Zenodo},
+  title        = {TrimGalore},
   month        = jul,
   year         = 2021,
   publisher    = {Zenodo},
   version      = {0.6.7},
-  doi          = {10.5281/zenodo.5127899},
+  doi          = {https://doi.org/10.5281/zenodo.5127899},
   url          = {https://doi.org/10.5281/zenodo.5127899}
 }
 
@@ -22,8 +22,10 @@
 	year = {2011},
 	keywords = {next generation sequencing; small RNA; microRNA; adapter removal},
 	abstract = {When small RNA is sequenced on current sequencing machines, the resulting reads are usually longer than the RNA and therefore contain parts of the 3' adapter. That adapter must be found and removed error-tolerantly from each read before read mapping. Previous solutions are either hard to use or do not offer required features, in particular support for color space data. As an easy to use alternative, we developed the command-line tool cutadapt, which supports 454, Illumina and SOLiD (color space) data, offers two adapter trimming algorithms, and has other useful features. Cutadapt, including its MIT-licensed source code, is available for download at http://code.google.com/p/cutadapt/},
-	issn = {2226-6089},	pages = {10--12},	doi = {10.14806/ej.17.1.200},
-	url = {https://journal.embnet.org/index.php/embnetjournal/article/view/200}
+	issn = {2226-6089},
+	pages = {10--12},
+	doi = {https://doi.org/10.14806/ej.17.1.200},
+	url = {https://doi.org/10.14806/ej.17.1.200}
 }
 
 @misc{andrews2012,
@@ -43,8 +45,8 @@
 	copyright = {2016 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.},
 	issn = {1548-7105},
 	shorttitle = {{DADA2}},
-	url = {https://www.nature.com/articles/nmeth.3869},
-	doi = {10.1038/nmeth.3869},
+	url = {https://doi.org/10.1038/nmeth.3869},
+	doi = {https://doi.org/10.1038/nmeth.3869},
 	abstract = {DADA2 is an open-source software package that denoises and removes sequencing errors from Illumina amplicon sequence data to distinguish microbial sample sequences differing by as little as a single nucleotide.},
 	language = {en},
 	number = {7},
@@ -53,8 +55,6 @@
 	author = {Callahan, Benjamin J. and McMurdie, Paul J. and Rosen, Michael J. and Han, Andrew W. and Johnson, Amy Jo A. and Holmes, Susan P.},
 	month = jul,
 	year = {2016},
-	note = {Number: 7
-Publisher: Nature Publishing Group},
 	keywords = {Metagenomics, Software, Statistical methods},
 	pages = {581--583},
 }
@@ -64,7 +64,8 @@ Publisher: Nature Publishing Group},
 	volume = {8},
 	issn = {1932-6203},
 	shorttitle = {phyloseq},
-	doi = {10.1371/journal.pone.0061217},
+	url = {https://doi.org/10.1371/journal.pone.0061217},
+	doi = {https://doi.org/10.1371/journal.pone.0061217},
 	abstract = {BACKGROUND: the analysis of microbial communities through dna sequencing brings many challenges: the integration of different types of data with methods from ecology, genetics, phylogenetics, multivariate statistics, visualization and testing. With the increased breadth of experimental designs now being pursued, project-specific statistical analyses are often needed, and these analyses are often difficult (or impossible) for peer researchers to independently reproduce. The vast majority of the requisite tools for performing these analyses reproducibly are already implemented in R and its extensions (packages), but with limited support for high throughput microbiome census data.
 RESULTS: Here we describe a software project, phyloseq, dedicated to the object-oriented representation and analysis of microbiome census data in R. It supports importing data from a variety of common formats, as well as many analysis techniques. These include calibration, filtering, subsetting, agglomeration, multi-table comparisons, diversity analysis, parallelized Fast UniFrac, ordination methods, and production of publication-quality graphics; all in a manner that is easy to document, share, and modify. We show how to apply functions from other R packages to phyloseq-represented data, illustrating the availability of a large number of open source analysis techniques. We discuss the use of phyloseq with tools for reproducible research, a practice common in other fields but still rare in the analysis of highly parallel microbiome census data. We have made available all of the materials necessary to completely reproduce the analysis and figures included in this article, an example of best practices for reproducible research.
 CONCLUSIONS: The phyloseq project for R is a new open-source software package, freely available on the web from both GitHub and Bioconductor.},
@@ -79,13 +80,13 @@ CONCLUSIONS: The phyloseq project for R is a new open-source software package, f
 	pages = {e61217}
 }
 
-@article{quast_silva_2012,
+@article{quast2012,
 	title = {The {SILVA} ribosomal {RNA} gene database project: improved data processing and web-based tools},
 	volume = {41},
 	issn = {0305-1048, 1362-4962},
 	shorttitle = {The {SILVA} ribosomal {RNA} gene database project},
-	url = {http://academic.oup.com/nar/article/41/D1/D590/1069277/The-SILVA-ribosomal-RNA-gene-database-project},
-	doi = {10.1093/nar/gks1219},
+	url = {ttps://doi.org/10.1093/nar/gks1219},
+	doi = {https://doi.org/10.1093/nar/gks1219},
 	abstract = {SILVA (from Latin silva, forest, http://www.arb-silva. de) is a comprehensive web resource for up to date, quality-controlled databases of aligned ribosomal RNA (rRNA) gene sequences from the Bacteria, Archaea and Eukaryota domains and supplementary online services. The referred database release 111 (July 2012) contains 3 194 778 small subunit and 288 717 large subunit rRNA gene sequences. Since the initial description of the project, substantial new features have been introduced, including advanced quality control procedures, an improved rRNA gene aligner, online tools for probe and primer evaluation and optimized browsing, searching and downloading on the website. Furthermore, the extensively curated SILVA taxonomy and the new non-redundant SILVA datasets provide an ideal reference for high-throughput classification of data from nextgeneration sequencing approaches.},
 	language = {en},
 	number = {D1},
@@ -95,24 +96,4 @@ CONCLUSIONS: The phyloseq project for R is a new open-source software package, f
 	month = nov,
 	year = {2012},
 	pages = {D590--D596},
-}
-
-@article{mcmurdie_phyloseq_2013,
-	title = {phyloseq: an {R} package for reproducible interactive analysis and graphics of microbiome census data},
-	volume = {8},
-	issn = {1932-6203},
-	shorttitle = {phyloseq},
-	doi = {10.1371/journal.pone.0061217},
-	abstract = {BACKGROUND: the analysis of microbial communities through dna sequencing brings many challenges: the integration of different types of data with methods from ecology, genetics, phylogenetics, multivariate statistics, visualization and testing. With the increased breadth of experimental designs now being pursued, project-specific statistical analyses are often needed, and these analyses are often difficult (or impossible) for peer researchers to independently reproduce. The vast majority of the requisite tools for performing these analyses reproducibly are already implemented in R and its extensions (packages), but with limited support for high throughput microbiome census data.
-RESULTS: Here we describe a software project, phyloseq, dedicated to the object-oriented representation and analysis of microbiome census data in R. It supports importing data from a variety of common formats, as well as many analysis techniques. These include calibration, filtering, subsetting, agglomeration, multi-table comparisons, diversity analysis, parallelized Fast UniFrac, ordination methods, and production of publication-quality graphics; all in a manner that is easy to document, share, and modify. We show how to apply functions from other R packages to phyloseq-represented data, illustrating the availability of a large number of open source analysis techniques. We discuss the use of phyloseq with tools for reproducible research, a practice common in other fields but still rare in the analysis of highly parallel microbiome census data. We have made available all of the materials necessary to completely reproduce the analysis and figures included in this article, an example of best practices for reproducible research.
-CONCLUSIONS: The phyloseq project for R is a new open-source software package, freely available on the web from both GitHub and Bioconductor.},
-	language = {eng},
-	number = {4},
-	journal = {PloS One},
-	author = {McMurdie, Paul J. and Holmes, Susan},
-	year = {2013},
-	pmid = {23630581},
-	pmcid = {PMC3632530},
-	keywords = {Data Interpretation, Statistical, Humans, Metagenome, Multivariate Analysis, Phylogeny, Principal Component Analysis, Sequence Analysis, DNA, Software},
-	pages = {e61217},
 }
