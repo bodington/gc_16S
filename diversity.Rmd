@@ -36,10 +36,22 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
-ps_16S <- readRDS('./02_out/phyloseq.Rds') %>%
-  ps_arrange(source, fraction) %>%
+ps_16S <- readRDS('./01_data/phyloseq_in.Rds')
+```
+```{r ps_filler_samples, message=FALSE, warning=FALSE, include=FALSE}
+ps_set <- subset_samples(ps_16S, label %in% c("Whole Replicate 2", "Whole Replicate 3"))
+sample_names(ps_set) <- c("4_5_1", "4_5_20", "7_5_1", "7_5_20", "CM_1", "CM_20", "LD_1", "LD_20")
+#sample_data(ps_set)$sample <- sample_names(ps_set)
+#sample_data(ps_set)$name <- c("GcA1", "GcA20", "GcB1", "GcB20", "GcC1", "GcC20", "GcL1", "GcL20")
+#sample_data(ps_set)$fraction <- c("1", "20", "1", "20", "1", "20", "1", "20")
+#sample_data(ps_set)$label <- rep(c("Filler"), 8)
+
+ps_16S <- merge_phyloseq(ps_16S, ps_set)
+sample_data(ps_16S)$name <- factor(sample_data(ps_16S)$name, levels = str_sort(sample_data(ps_16S)$name, numeric = TRUE))
+ps_16S <- ps_arrange(ps_16S, name) %>%
   tax_fix()
 ```
+
 
 ```{r import_mag,  message=FALSE, warning=FALSE, include=FALSE}
 tax_merge <- merge_phyloseq(tax_table(ps_16S),tax_table(as.matrix(read.table(file = "01_data/gc_mag_tax.csv", header = TRUE, sep = ",", row.names = 1))))
@@ -52,13 +64,13 @@ otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_16S), otu_mag_merge_ps_1
 
 ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge) %>%
   ps_filter(!(label %in% c("Mixed", "Whole Replicate 2", "Whole Replicate 3"))) %>%
-  ps_arrange(source, fraction) %>%
   tax_fix()
 
 labels <- append(append(sample_data(ps_merge)$label[!sample_data(ps_merge)$label %in% c("Whole", "Genome (MAG)")], "Whole", 0), "Genome (MAG)")
 sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
 sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
 sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = labels)
+ps_merge <- ps_arrange(ps_merge, name)
 ```
 
 ## Alpha Diversity
@@ -214,7 +226,6 @@ zp <- ggarrange(zp1, zp2,
           nrow = 2,
           heights = c(0.32,1),
           align = "v")
-zp
 ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png", height = 7, width = 14)
 ```
 
