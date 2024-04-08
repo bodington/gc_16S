@@ -1,60 +1,72 @@
-sample_id,sample,name,source,soil,fraction,ri,bouyantdensity,bd_round,GC,GC_round,old_label,label
-4_5_0,4_5_0,GcA-0,GcA,Craibstone pH 4.5,0,,,,,,Total,Mixed
-4_5_0-1,4_5_0-1,GcA-1,GcA,Craibstone pH 4.5,0,,,,,,Total 1,Whole
-4_5_0-2,4_5_0-2,GcA-2,GcA,Craibstone pH 4.5,0,,,,,,Total 2,Whole Replicate 2
-4_5_0-3,4_5_0-3,GcA-3,GcA,Craibstone pH 4.5,0,,,,,,Total 3,Whole Replicate 3
-4_5_4,4_5_4,GcA4,GcA,Craibstone pH 4.5,4,1.3994,1.697,1.697,68.7,68.7,F4,"F4 (BD 1.697, GC 68.7)"
-4_5_5,4_5_5,GcA5,GcA,Craibstone pH 4.5,5,1.3988,1.691,1.691,64.8,64.8,F5,"F5 (BD 1.691, GC 64.8)"
-4_5_6,4_5_6,GcA6,GcA,Craibstone pH 4.5,6,1.3982,1.684,1.684,60.9,60.9,F6,"F6 (BD 1.684, GC 60.9)"
-4_5_7,4_5_7,GcA7,GcA,Craibstone pH 4.5,7,1.3976,1.677,1.677,57,57,F7,"F7 (BD 1.677, GC 57)"
-4_5_8,4_5_8,GcA8,GcA,Craibstone pH 4.5,8,1.3972,1.673,1.673,54.5,54.5,F8,"F8 (BD 1.673, GC 54.5)"
-4_5_9,4_5_9,GcA9,GcA,Craibstone pH 4.5,9,1.3966,1.667,1.667,50.6,50.6,F9,"F9 (BD 1.667, GC 50.6)"
-4_5_10,4_5_10,GcA10,GcA,Craibstone pH 4.5,10,1.3961,1.661,1.661,47.3,47.3,F10,"F10 (BD 1.661, GC 47.3)"
-4_5_11,4_5_11,GcA11,GcA,Craibstone pH 4.5,11,1.3956,1.656,1.656,44.1,44.1,F11,"F11 (BD 1.656, GC 44.1)"
-4_5_12,4_5_12,GcA12,GcA,Craibstone pH 4.5,12,1.3951,1.65,1.65,40.9,40.9,F12,"F12 (BD 1.65, GC 40.9)"
-4_5_13,4_5_13,GcA13,GcA,Craibstone pH 4.5,13,1.3946,1.645,1.645,37.6,37.6,F13,"F13 (BD 1.645, GC 37.6)"
-4_5_14,4_5_14,GcA14,GcA,Craibstone pH 4.5,14,1.3941,1.639,1.639,34.4,34.4,F14,"F14 (BD 1.639, GC 34.4)"
-7_5_0,7_5_0,GcB-0,GcB,Craibstone pH 7.5,0,,,,,,Total,Mixed
-7_5_0-1,7_5_0-1,GcB-1,GcB,Craibstone pH 7.5,0,,,,,,Total 1,Whole
-7_5_0-2,7_5_0-2,GcB-2,GcB,Craibstone pH 7.5,0,,,,,,Total 2,Whole Replicate 2
-7_5_0-3,7_5_0-3,GcB-3,GcB,Craibstone pH 7.5,0,,,,,,Total 3,Whole Replicate 3
-7_5_4,7_5_4,GcB4,GcB,Craibstone pH 7.5,4,1.4,1.7037073,1.704,72.6,72.6,F4,"F4 (BD 1.704, GC 72.6)"
-7_5_5,7_5_5,GcB5,GcB,Craibstone pH 7.5,5,1.3994,1.6971511,1.697,68.7,68.7,F5,"F5 (BD 1.697, GC 68.7)"
-7_5_6,7_5_6,GcB6,GcB,Craibstone pH 7.5,6,1.3989,1.6916876,1.692,65.4,65.4,F6,"F6 (BD 1.692, GC 65.4)"
-7_5_7,7_5_7,GcB7,GcB,Craibstone pH 7.5,7,1.3982,1.6840387,1.684,60.9,60.9,F7,"F7 (BD 1.684, GC 60.9)"
-7_5_8,7_5_8,GcB8,GcB,Craibstone pH 7.5,8,1.3976,1.6774825,1.677,57,57,F8,"F8 (BD 1.677, GC 57)"
-7_5_9,7_5_9,GcB9,GcB,Craibstone pH 7.5,9,1.3971,1.672019,1.672,53.8,53.8,F9,"F9 (BD 1.672, GC 53.8)"
-7_5_10,7_5_10,GcB10,GcB,Craibstone pH 7.5,10,1.3966,1.6665555,1.667,50.6,50.6,F10,"F10 (BD 1.667, GC 50.6)"
-7_5_11,7_5_11,GcB11,GcB,Craibstone pH 7.5,11,1.396,1.6599993,1.66,46.7,46.7,F11,"F11 (BD 1.66, GC 46.7)"
-7_5_12,7_5_12,GcB12,GcB,Craibstone pH 7.5,12,1.3955,1.6545358,1.655,43.5,43.5,F12,"F12 (BD 1.655, GC 43.5)"
-7_5_13,7_5_13,GcB13,GcB,Craibstone pH 7.5,13,1.395,1.6490723,1.649,40.2,40.2,F13,"F13 (BD 1.649, GC 40.2)"
-7_5_14,7_5_14,GcB14,GcB,Craibstone pH 7.5,14,1.3945,1.6436088,1.644,37,37,F14,"F14 (BD 1.644, GC 37)"
-CM_0,CM_0,GcC-0,GcC,Corsemaul,0,,,,,,Total,Mixed
-CM_0-1,CM_0-1,GcC-1,GcC,Corsemaul,0,,,,,,Total 1,Whole
-CM_0-2,CM_0-2,GcC-2,GcC,Corsemaul,0,,,,,,Total 2,Whole Replicate 2
-CM_0-3,CM_0-3,GcC-3,GcC,Corsemaul,0,,,,,,Total 3,Whole Replicate 3
-CM_5,CM_5,GcC5,GcC,Corsemaul,5,1.3993,1.6960584,1.696,68,68,F5,"F5 (BD 1.696, GC 68)"
-CM_6,CM_6,GcC6,GcC,Corsemaul,6,1.3986,1.6884095,1.688,64,64,F6,"F6 (BD 1.688, GC 64)"
-CM_7,CM_7,GcC7,GcC,Corsemaul,7,1.398,1.6818533,1.682,60,60,F7,"F7 (BD 1.682, GC 60)"
-CM_8,CM_8,GcC8,GcC,Corsemaul,8,1.3973,1.6742044,1.674,55,55,F8,"F8 (BD 1.674, GC 55)"
-CM_9,CM_9,GcC9,GcC,Corsemaul,9,1.3967,1.6676482,1.668,51,51,F9,"F9 (BD 1.668, GC 51)"
-CM_10,CM_10,GcC10,GcC,Corsemaul,10,1.3962,1.6621847,1.662,48,48,F10,"F10 (BD 1.662, GC 48)"
-CM_11,CM_11,GcC11,GcC,Corsemaul,11,1.3957,1.6567212,1.657,45,45,F11,"F11 (BD 1.657, GC 45)"
-LD_0,LD_0,GcL-0,GcL,Lower Dell,0,,,,,,Total,Mixed
-LD_0-1,LD_0-1,GcL-1,GcL,Lower Dell,0,,,,,,Total 1,Whole
-LD_0-2,LD_0-2,GcL-2,GcL,Lower Dell,0,,,,,,Total 2,Whole Replicate 2
-LD_0-3,LD_0-3,GcL-3,GcL,Lower Dell,0,,,,,,Total 3,Whole Replicate 3
-LD_4,LD_4,GcL4,GcL,Lower Dell,4,1.3997,1.7004292,1.7,70.61993,70.6,F4,"F4 (BD 1.7, GC 70.6)"
-LD_5,LD_5,GcL5,GcL,Lower Dell,5,1.3992,1.6949657,1.695,67.38648,67.4,F5,"F5 (BD 1.695, GC 67.4)"
-LD_6,LD_6,GcL6,GcL,Lower Dell,6,1.3985,1.6873168,1.687,62.85965,62.9,F6,"F6 (BD 1.687, GC 62.9)"
-LD_7,LD_7,GcL7,GcL,Lower Dell,7,1.398,1.6818533,1.682,59.6262,59.6,F7,"F7 (BD 1.682, GC 59.6)"
-LD_8,LD_8,GcL8,GcL,Lower Dell,8,1.3974,1.6752971,1.675,55.74606,55.7,F8,"F8 (BD 1.675, GC 55.7)"
-LD_9,LD_9,GcL9,GcL,Lower Dell,9,1.3968,1.6687409,1.669,51.86592,51.9,F9,"F9 (BD 1.669, GC 51.9)"
-LD_10,LD_10,GcL10,GcL,Lower Dell,10,1.3963,1.6632774,1.663,48.63247,48.6,F10,"F10 (BD 1.663, GC 48.6)"
-LD_11,LD_11,GcL11,GcL,Lower Dell,11,1.3957,1.6567212,1.657,44.75233,44.8,F11,"F11 (BD 1.657, GC 44.8)"
-LD_12,LD_12,GcL12,GcL,Lower Dell,12,1.3952,1.6512577,1.651,41.51888,41.5,F12,"F12 (BD 1.651, GC 41.5)"
-LD_13,LD_13,GcL13,GcL,Lower Dell,13,1.3948,1.6468869,1.647,38.93212,38.9,F13,"F13 (BD 1.647, GC 38.9)"
-4_5_M,4_5_M,GcAM,GcA,Craibstone pH 4.5,15,,,,,,MAG,"Genome (MAG)"
-7_5_M,7_5_M,GcBM,GcB,Craibstone pH 7.5,15,,,,,,MAG,"Genome (MAG)"
-CM_M,CM_M,GcCM,GcC,Corsemaul,15,,,,,,MAG,"Genome (MAG)"
-LD_M,LD_M,GcLM,GcL,Lower Dell,15,,,,,,MAG,"Genome (MAG)"
+sample_id,sample,name,source,soil,fraction,ri,bouyantdensity,bd_round,GC,GC_round,label
+4.5_0,4.5_0,GcA,GcA,Craibstone pH 4.5,0,,,,,,GcA
+4.5_0.1,4.5_0.1,GcAr1,GcA,Craibstone pH 4.5,0,,,,,,GcArep1
+4.5_0.2,4.5_0.2,GcAr2,GcA,Craibstone pH 4.5,0,,,,,,GcArep2
+4.5_0.3,4.5_0.3,GcAr3,GcA,Craibstone pH 4.5,0,,,,,,GcArep3
+4.5_1,4.5_1,GcA1,GcA,Craibstone pH 4.5,1,,,,,,Filler1
+4.5_4,4.5_4,GcA4,GcA,Craibstone pH 4.5,4,1.3994,1.697,1.697,68.7,68.7,GcA4 (68)
+4.5_5,4.5_5,GcA5,GcA,Craibstone pH 4.5,5,1.3988,1.691,1.691,64.8,64.8,GcA5 (64)
+4.5_6,4.5_6,GcA6,GcA,Craibstone pH 4.5,6,1.3982,1.684,1.684,60.9,60.9,GcA6 (60)
+4.5_7,4.5_7,GcA7,GcA,Craibstone pH 4.5,7,1.3976,1.677,1.677,57,57,GcA7 (57)
+4.5_8,4.5_8,GcA8,GcA,Craibstone pH 4.5,8,1.3972,1.673,1.673,54.5,54.5,GcA8 (54)
+4.5_9,4.5_9,GcA9,GcA,Craibstone pH 4.5,9,1.3966,1.667,1.667,50.6,50.6,GcA9 (50)
+4.5_10,4.5_10,GcA10,GcA,Craibstone pH 4.5,10,1.3961,1.661,1.661,47.3,47.3,GcA10 (47)
+4.5_11,4.5_11,GcA11,GcA,Craibstone pH 4.5,11,1.3956,1.656,1.656,44.1,44.1,GcA11 (44)
+4.5_12,4.5_12,GcA12,GcA,Craibstone pH 4.5,12,1.3951,1.65,1.65,40.9,40.9,GcA12 (40)
+4.5_13,4.5_13,GcA13,GcA,Craibstone pH 4.5,13,1.3946,1.645,1.645,37.6,37.6,GcA13 (37)
+4.5_14,4.5_14,GcA14,GcA,Craibstone pH 4.5,14,1.3941,1.639,1.639,34.4,34.4,GcA14 (34)
+4.5_20,4.5_20,GcA20,GcA,Craibstone pH 4.5,20,,,,,,Filler2
+7.5_0,7.5_0,GcB,GcB,Craibstone pH 7.5,0,,,,,,GcB
+7.5_0.1,7.5_0.1,GcBr1,GcB,Craibstone pH 7.5,0,,,,,,GcBrep1
+7.5_0.2,7.5_0.2,GcBr2,GcB,Craibstone pH 7.5,0,,,,,,GcBrep2
+7.5_0.3,7.5_0.3,GcBr3,GcB,Craibstone pH 7.5,0,,,,,,GcBrep3
+7.5_1,7.5_1,GcB1,GcB,Craibstone pH 7.5,1,,,,,,Filler3
+7.5_4,7.5_4,GcB4,GcB,Craibstone pH 7.5,4,1.4,1.7037073,1.704,72.6,72.6,GcB4 (72)
+7.5_5,7.5_5,GcB5,GcB,Craibstone pH 7.5,5,1.3994,1.6971511,1.697,68.7,68.7,GcB5 (68)
+7.5_6,7.5_6,GcB6,GcB,Craibstone pH 7.5,6,1.3989,1.6916876,1.692,65.4,65.4,GcB6 (65)
+7.5_7,7.5_7,GcB7,GcB,Craibstone pH 7.5,7,1.3982,1.6840387,1.684,60.9,60.9,GcB7 (60)
+7.5_8,7.5_8,GcB8,GcB,Craibstone pH 7.5,8,1.3976,1.6774825,1.677,57,57,GcB8 (57)
+7.5_9,7.5_9,GcB9,GcB,Craibstone pH 7.5,9,1.3971,1.672019,1.672,53.8,53.8,GcB9 (53)
+7.5_10,7.5_10,GcB10,GcB,Craibstone pH 7.5,10,1.3966,1.6665555,1.667,50.6,50.6,GcB10 (50)
+7.5_11,7.5_11,GcB11,GcB,Craibstone pH 7.5,11,1.396,1.6599993,1.66,46.7,46.7,GcB11 (46)
+7.5_12,7.5_12,GcB12,GcB,Craibstone pH 7.5,12,1.3955,1.6545358,1.655,43.5,43.5,GcB12 (43)
+7.5_13,7.5_13,GcB13,GcB,Craibstone pH 7.5,13,1.395,1.6490723,1.649,40.2,40.2,GcB13 (40)
+7.5_14,7.5_14,GcB14,GcB,Craibstone pH 7.5,14,1.3945,1.6436088,1.644,37,37,GcB14 (37)
+7.5_20,7.5_20,GcB20,GcB,Craibstone pH 7.5,20,,,,,,Filler4
+CM_0,CM_0,GcC,GcC,Corsemaul,0,,,,,,GcC
+CM_0.1,CM_0.1,GcCr1,GcC,Corsemaul,0,,,,,,GcCrep1
+CM_0.2,CM_0.2,GcCr2,GcC,Corsemaul,0,,,,,,GcCrep2
+CM_0.3,CM_0.3,GcCr3,GcC,Corsemaul,0,,,,,,GcCrep3
+CM_1,CM_1,GcC1,GcC,Corsemaul,1,,,,,,Filler5
+CM_5,CM_5,GcC5,GcC,Corsemaul,5,1.3993,1.6960584,1.696,68,68,GcC5 (68)
+CM_6,CM_6,GcC6,GcC,Corsemaul,6,1.3986,1.6884095,1.688,64,64,GcC6 (64)
+CM_7,CM_7,GcC7,GcC,Corsemaul,7,1.398,1.6818533,1.682,60,60,GcC7 (60)
+CM_8,CM_8,GcC8,GcC,Corsemaul,8,1.3973,1.6742044,1.674,55,55,GcC8 (55)
+CM_9,CM_9,GcC9,GcC,Corsemaul,9,1.3967,1.6676482,1.668,51,51,GcC9 (51)
+CM_10,CM_10,GcC10,GcC,Corsemaul,10,1.3962,1.6621847,1.662,48,48,GcC10 (48)
+CM_11,CM_11,GcC11,GcC,Corsemaul,11,1.3957,1.6567212,1.657,45,45,GcC11 (45)
+CM_20,CM_20,GcC20,GcC,Corsemaul,20,,,,,,Filler6
+LD_0,LD_0,GcL-0,GcL,Lower Dell,0,,,,,,GcL
+LD_0.1,LD_0.1,GcL-1,GcL,Lower Dell,0,,,,,,GcLrep1
+LD_0.2,LD_0.2,GcL-2,GcL,Lower Dell,0,,,,,,GcLrep2
+LD_0.3,LD_0.3,GcL-3,GcL,Lower Dell,0,,,,,,GcLrep3
+LD_1,LD_1,GcL1,GcL,Lower Dell,1,,,,,,Filler7
+LD_4,LD_4,GcL4,GcL,Lower Dell,4,1.3997,1.7004292,1.7,70.61993,70.6,GcL4 (70)
+LD_5,LD_5,GcL5,GcL,Lower Dell,5,1.3992,1.6949657,1.695,67.38648,67.4,GcL5 (67)
+LD_6,LD_6,GcL6,GcL,Lower Dell,6,1.3985,1.6873168,1.687,62.85965,62.9,GcL6 (62)
+LD_7,LD_7,GcL7,GcL,Lower Dell,7,1.398,1.6818533,1.682,59.6262,59.6,GcL7 (59)
+LD_8,LD_8,GcL8,GcL,Lower Dell,8,1.3974,1.6752971,1.675,55.74606,55.7,GcL8 (55)
+LD_9,LD_9,GcL9,GcL,Lower Dell,9,1.3968,1.6687409,1.669,51.86592,51.9,GcL9 (51)
+LD_10,LD_10,GcL10,GcL,Lower Dell,10,1.3963,1.6632774,1.663,48.63247,48.6,GcL10 (48)
+LD_11,LD_11,GcL11,GcL,Lower Dell,11,1.3957,1.6567212,1.657,44.75233,44.8,GcL11 (44)
+LD_12,LD_12,GcL12,GcL,Lower Dell,12,1.3952,1.6512577,1.651,41.51888,41.5,GcL12 (41)
+LD_13,LD_13,GcL13,GcL,Lower Dell,13,1.3948,1.6468869,1.647,38.93212,38.9,GcL13 (38)
+LD_20,LD_20,GcL20,GcL,Lower Dell,20,,,,,,Filler8
+4.5_M5,4.5_M5,GcAM5,GcA,Craibstone pH 4.5,5,,,,,,GcA5 MAG (64)
+4.5_M11,4.5_M11,GcAM11,GcA,Craibstone pH 4.5,11,,,,,,GcA11 MAG (44)
+7.5_M4,7.5_M4,GcBM4,GcB,Craibstone pH 7.5,4,,,,,,GcB4 MAG(72)
+7.5_M14,7.5_M14,GcBM14,GcB,Craibstone pH 7.5,14,,,,,,GcB14 MAG (37)
+CM_M5,CM_M5,GcCM5,GcC,Corsemaul,5,,,,,,GcC5 MAG (68)
+CM_M11,CM_M11,GcCM11,GcC,Corsemaul,11,,,,,,GcC11 MAG (45)
+LD_M4,LD_M4,GcLM4,GcL,Lower Dell,4,,,,,,GcL4 MAG (70)
+LD_M13,LD_M13,GcLM13,GcL,Lower Dell,13,,,,,,GcL13 MAG (38)
