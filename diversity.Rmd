@@ -16,7 +16,8 @@ link-citations: true
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2); theme_set(theme_light())
+library(devtools)
+library(ggplot2)
 library(ggpubr)
 library(ggsci)
 library(RColorBrewer)
@@ -29,19 +30,18 @@ library(speedyseq)
 library(microViz)
 library(metagMisc)
 library(Biostrings)
-source("./R/phyloseq.mate.R")
+source_url("https://raw.githubusercontent.com/CGR-lab/barbecue/main/scripts/R/phyloseq.mate.R")
 ```
 
 ## Introduction
 
-After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA. [This script](https://github.com/bodington/gc_16S/blob/main/R/phyloseq_taxonomy_imputation.R) modifies the tax table of a phyloseq object to replace NA with the lowest assigned level + "_unidentified" eg "Bacteria, Cyanobacteria, Cyanobacteria_unidentified"
-
+After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA.
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
 ps_16S <- readRDS('./01_data/phyloseq_gtdb.Rds')
 ```
 ```{r ps_filler_samples, message=FALSE, warning=FALSE, include=FALSE}
-#ps_set <- subset_samples(ps_16S, label %in% c("Whole Replicate 2", "Whole Replicate 3"))
+ps_set <- subset_samples(ps_16S, label %in% c("GcArep1", "GcArep2", "GcBrep1", "GcBrep2", "GcCrep1", "GcCrep2", "GcLrep1", "GcLrep2"))
 ps_set <- ps_16S
 sample_names(ps_set) <- c("4.5_1", "4.5_20", "7.5_1", "7.5_20", "CM_1", "CM_20", "LD_1", "LD_20")
 sample_data(ps_set)$sample <- sample_names(ps_set)
@@ -67,13 +67,13 @@ otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_16S), otu_mag_merge_ps_1
 
 ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge) %>%
 #  ps_filter(!(label %in% c("Mixed", "Whole Replicate 2", "Whole Replicate 3"))) %>%
-  tax_fix()
+#  tax_fix()
 
 labels <- append(sample_data(ps_merge)$label[!sample_data(ps_merge)$label %in% c("Whole", "Genome (MAG)")], "Whole", 0)
 
 sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
 labels = c(c("Whole"), sample_data(ps_merge)$label[!sample_data(ps_merge)$label %in% c("Whole")])
-sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("Craibstone pH 4.5", "Craibstone pH 7.5", "Corsemaul", "Lower Dell"))
+sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 4.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
 sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = labels)
 ps_merge <- ps_arrange(ps_merge, name)
 ```
