@@ -16,23 +16,23 @@ sample_id,sample,name,source,soil,fraction,ri,bouyantdensity,bd_round,GC,GC_roun
 4.5_13,4.5_13,GcA13,GcA,GcA (Craibstone pH 4.5),13,1.3946,1.645,1.645,37.6,37.6,GcA13 (37)
 4.5_14,4.5_14,GcA14,GcA,GcA (Craibstone pH 4.5),14,1.3941,1.639,1.639,34.4,34.4,GcA14 (34)
 4.5_20,4.5_20,GcA20,GcA,GcA (Craibstone pH 4.5),20,,,,,,Fill2
-7.5_0,7.5_0,GcB,GcB,GcB (Craibstone pH 4.5),0,,,,,,GcB
-7.5_0.1,7.5_0.1,GcBr1,GcB,GcB (Craibstone pH 4.5),0,,,,,,GcBrep1
-7.5_0.2,7.5_0.2,GcBr2,GcB,GcB (Craibstone pH 4.5),0,,,,,,GcBrep2
-7.5_0.3,7.5_0.3,GcBr3,GcB,GcB (Craibstone pH 4.5),0,,,,,,GcBrep3
-7.5_1,7.5_1,GcB1,GcB,GcB (Craibstone pH 4.5),1,,,,,,Fill3
-7.5_4,7.5_4,GcB4,GcB,GcB (Craibstone pH 4.5),4,1.4,1.7037073,1.704,72.6,72.6,GcB4 (72)
-7.5_5,7.5_5,GcB5,GcB,GcB (Craibstone pH 4.5),5,1.3994,1.6971511,1.697,68.7,68.7,GcB5 (68)
-7.5_6,7.5_6,GcB6,GcB,GcB (Craibstone pH 4.5),6,1.3989,1.6916876,1.692,65.4,65.4,GcB6 (65)
-7.5_7,7.5_7,GcB7,GcB,GcB (Craibstone pH 4.5),7,1.3982,1.6840387,1.684,60.9,60.9,GcB7 (60)
-7.5_8,7.5_8,GcB8,GcB,GcB (Craibstone pH 4.5),8,1.3976,1.6774825,1.677,57,57,GcB8 (57)
-7.5_9,7.5_9,GcB9,GcB,GcB (Craibstone pH 4.5),9,1.3971,1.672019,1.672,53.8,53.8,GcB9 (53)
-7.5_10,7.5_10,GcB10,GcB,GcB (Craibstone pH 4.5),10,1.3966,1.6665555,1.667,50.6,50.6,GcB10 (50)
-7.5_11,7.5_11,GcB11,GcB,GcB (Craibstone pH 4.5),11,1.396,1.6599993,1.66,46.7,46.7,GcB11 (46)
-7.5_12,7.5_12,GcB12,GcB,GcB (Craibstone pH 4.5),12,1.3955,1.6545358,1.655,43.5,43.5,GcB12 (43)
-7.5_13,7.5_13,GcB13,GcB,GcB (Craibstone pH 4.5),13,1.395,1.6490723,1.649,40.2,40.2,GcB13 (40)
-7.5_14,7.5_14,GcB14,GcB,GcB (Craibstone pH 4.5),14,1.3945,1.6436088,1.644,37,37,GcB14 (37)
-7.5_20,7.5_20,GcB20,GcB,GcB (Craibstone pH 4.5),20,,,,,,Fill4
+7.5_0,7.5_0,GcB,GcB,GcB (Craibstone pH 7.5),0,,,,,,GcB
+7.5_0.1,7.5_0.1,GcBr1,GcB,GcB (Craibstone pH 7.5),0,,,,,,GcBrep1
+7.5_0.2,7.5_0.2,GcBr2,GcB,GcB (Craibstone pH 7.5),0,,,,,,GcBrep2
+7.5_0.3,7.5_0.3,GcBr3,GcB,GcB (Craibstone pH 7.5),0,,,,,,GcBrep3
+7.5_1,7.5_1,GcB1,GcB,GcB (Craibstone pH 7.5),1,,,,,,Fill3
+7.5_4,7.5_4,GcB4,GcB,GcB (Craibstone pH 7.5),4,1.4,1.7037073,1.704,72.6,72.6,GcB4 (72)
+7.5_5,7.5_5,GcB5,GcB,GcB (Craibstone pH 7.5),5,1.3994,1.6971511,1.697,68.7,68.7,GcB5 (68)
+7.5_6,7.5_6,GcB6,GcB,GcB (Craibstone pH 7.5),6,1.3989,1.6916876,1.692,65.4,65.4,GcB6 (65)
+7.5_7,7.5_7,GcB7,GcB,GcB (Craibstone pH 7.5),7,1.3982,1.6840387,1.684,60.9,60.9,GcB7 (60)
+7.5_8,7.5_8,GcB8,GcB,GcB (Craibstone pH 7.5),8,1.3976,1.6774825,1.677,57,57,GcB8 (57)
+7.5_9,7.5_9,GcB9,GcB,GcB (Craibstone pH 7.5),9,1.3971,1.672019,1.672,53.8,53.8,GcB9 (53)
+7.5_10,7.5_10,GcB10,GcB,GcB (Craibstone pH 7.5),10,1.3966,1.6665555,1.667,50.6,50.6,GcB10 (50)
+7.5_11,7.5_11,GcB11,GcB,GcB (Craibstone pH 7.5),11,1.396,1.6599993,1.66,46.7,46.7,GcB11 (46)
+7.5_12,7.5_12,GcB12,GcB,GcB (Craibstone pH 7.5),12,1.3955,1.6545358,1.655,43.5,43.5,GcB12 (43)
+7.5_13,7.5_13,GcB13,GcB,GcB (Craibstone pH 7.5),13,1.395,1.6490723,1.649,40.2,40.2,GcB13 (40)
+7.5_14,7.5_14,GcB14,GcB,GcB (Craibstone pH 7.5),14,1.3945,1.6436088,1.644,37,37,GcB14 (37)
+7.5_20,7.5_20,GcB20,GcB,GcB (Craibstone pH 7.5),20,,,,,,Fill4
 CM_0,CM_0,GcC,GcC,GcC (Corsemaul),0,,,,,,GcC
 CM_0.1,CM_0.1,GcCr1,GcC,GcC (Corsemaul),0,,,,,,GcCrep1
 CM_0.2,CM_0.2,GcCr2,GcC,GcC (Corsemaul),0,,,,,,GcCrep2
@@ -64,8 +64,8 @@ LD_13,LD_13,GcL13,GcL,GcL (Lower Dell),13,1.3948,1.6468869,1.647,38.93212,38.9,G
 LD_20,LD_20,GcL20,GcL,GcL (Lower Dell),20,,,,,,Fill8
 4.5_M5,4.5_M5,GcAM5,GcA,GcA (Craibstone pH 4.5),5,,,,,,GcA5 MAG (64)
 4.5_M11,4.5_M11,GcAM11,GcA,GcA (Craibstone pH 4.5),11,,,,,,GcA11 MAG (44)
-7.5_M4,7.5_M4,GcBM4,GcB,GcB (Craibstone pH 4.5),4,,,,,,GcB4 MAG(72)
-7.5_M14,7.5_M14,GcBM14,GcB,GcB (Craibstone pH 4.5),14,,,,,,GcB14 MAG (37)
+7.5_M4,7.5_M4,GcBM4,GcB,GcB (Craibstone pH 7.5),4,,,,,,GcB4 MAG (72)
+7.5_M14,7.5_M14,GcBM14,GcB,GcB (Craibstone pH 7.5),14,,,,,,GcB14 MAG (37)
 CM_M5,CM_M5,GcCM5,GcC,GcC (Corsemaul),5,,,,,,GcC5 MAG (68)
 CM_M11,CM_M11,GcCM11,GcC,GcC (Corsemaul),11,,,,,,GcC11 MAG (45)
 LD_M4,LD_M4,GcLM4,GcL,GcL (Lower Dell),4,,,,,,GcL4 MAG (70)

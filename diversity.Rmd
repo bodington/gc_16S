@@ -21,7 +21,9 @@ library(ggplot2)
 library(ggpubr)
 library(ggsci)
 library(RColorBrewer)
+library(microshades)
 library(tidyr)
+library(purrr)
 library(stringr)
 library(dplyr)
 library(phyloseq)
@@ -38,7 +40,13 @@ source_url("https://raw.githubusercontent.com/CGR-lab/barbecue/main/scripts/R/ph
 After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA.
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
-ps_16S <- readRDS('./01_data/phyloseq_gtdb.Rds')
+ps_raw <- readRDS('./01_data/phyloseq_gtdb.Rds')
+set.seed(90210)
+ps_16S <- ps_raw %>%
+  rarefy_even_depth(sample.size = min(sample_sums(ps_raw))) %>%
+  tax_filter(min_sample_abundance = 2)
+
+sort_taxa <- read.csv("00_ref/GTDB_bac120_arc53_ssu_r207_clade_sort.csv", header = TRUE)
 ```
 
 ```{r import_mag,  message=FALSE, warning=FALSE, include=FALSE}
@@ -66,28 +74,69 @@ sample_data(ps_merge) <- sample_data(read.table(file = "00_ref/phyloseq_metadata
 
 sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
 ps_merge <- ps_arrange(ps_merge, name)
-sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 4.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
+sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 7.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
 sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = sample_data(ps_merge)$label)
 
-ps_all <- subset_samples(ps_merge, !label %in% c("Fill1", "Fill2", "Fill3", "Fill4", "Fill5", "Fill6", "Fill7", "Fill8"))
-ps_merge <- subset_samples(ps_merge, !label %in% c("GcArep1", "GcArep2", "GcArep3", "GcBrep1", "GcBrep2", "GcBrep3", "GcCrep1", "GcCrep2", "GcCrep3", "GcLrep1", "GcLrep2", "GcLrep3"))
+ps_all <- subset_samples(ps_raw, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
+ps_merge <- subset_samples(ps_merge, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
+#ps_merge <- subset_samples(ps_merge, !label %in% c("GcArep1", "GcArep2", "GcArep3", "GcBrep1", "GcBrep2", "GcBrep3", "GcCrep1", "GcCrep2", "GcCrep3", "GcLrep1", "GcLrep2", "GcLrep3"))
+save(ps_all, ps_merge, file = "./01_data/phyloseq_all.Rdata")
 ```
 
 ## Alpha Diversity
+```{r rarefaction_curve, fig.height=8, fig.width=12}
+otu <- t(abundances(ps_all))
+rare_curve <- vegan::rarecurve(otu, step = 50)
+rare <- lapply(rare_curve, function(x){
+  b <- as.data.frame(x)
+  b <- data.frame(OTU = b[,1], raw.read = rownames(b))
+  b$raw.read <- as.numeric(gsub("N", "",  b$raw.read))
+  return(b)
+  }
+)
+names(rare) <- rownames(otu)
+
+rare <- map_dfr(
+          rare,
+          function(x){
+            z <- data.frame(x)
+            return(z)
+            },
+          .id = "sample"
+          )
+rare$soil = str_extract(rare$sample, pattern = "^[^_]+")
+
+rare_labels <- as_labeller(c(`4.5` = "GcA", `7.5` = "GcB", `CM` = "GcC", `LD` = "GcL"))
+
+rare_data <- rare %>%
+            group_by(sample) %>%
+            arrange(desc(raw.read)) %>%
+            filter(row_number()==1)
+
+rare_plot <- ggplot(rare) +
+        geom_line(
+          aes(
+            x = raw.read,
+            y = OTU,
+            colour = sample
+          )
+        ) +
+        geom_text(
+          data = rare_data,
+          aes(
+            x = raw.read + 6000, y = OTU, label = rare_data$sample
+          )
+        ) +
+        facet_wrap(
+          vars(soil),
+          nrow = 1,
+          labeller = rare_labels
+        )
+```
+
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
-otu_tab <- t(abundances(ps_all))
-png("./02_out/rare.png")
-p <- vegan::rarecurve(otu_tab, 
-                      step = 50, label = FALSE, 
-                      sample = min(rowSums(otu_tab), 
-                                   col = "blue", cex = 0.6))
-dev.off()
-
-set.seed(90210)
-ps_all_rare <- rarefy_even_depth(ps_all, sample.size = 15000)
-
-alpha_all <- alpha(ps_all_rare, index = "all")
+alpha_all <- alpha(ps_all, index = "all")
 rownames(alpha_all) <- sample_data(ps_all)$name
 alpha_all$source <- sample_data(ps_all)$soil
 alpha_all$name <- sample_data(ps_all)$label
@@ -146,12 +195,17 @@ observed_plot <- plot_richness(ps_merge,
 ## Community Composition
 
 ```{r gtdb_relabund}
+#phylum_levels <- append(sort_taxa$Phylum[nzchar(sort_taxa$Phylum)], c("Unassigned", "Other"))
+
+
+
 write.table(ps_all %>%
               tax_fix() %>%
               tax_transform(trans = "compositional", rank = "Phylum") %>%
               psmelt() %>%
               select(name, Phylum, Abundance) %>%
-              spread(Phylum, Abundance),
+#              arrange(relabund_table, match(relabund_table$Phylum, phylum_levels)) %>%
+              pivot_wider(names_from = Phylum, values_from = Abundance),
             file = "./02_out/ps_16S.relative_abundance.phylum.csv",
             sep = ",",
             quote = F,
@@ -161,22 +215,22 @@ write.table(ps_all %>%
 ```
 
 ```{r phylum_relabund, fig.height=6, fig.width=20}
-phylum_levels <- append(levels(factor(tax_table(ps_merge)[,"Phylum"])), "Other")
-
 ps <- ps_merge %>%
-  tax_fix() %>%
-#  tax_transform(trans = "compositional", rank = "Phylum") %>%
-  transform_sample_counts(function(x) ((x * 100) / sum(x))) %>%
-  tax_glom(taxrank = "Phylum", bad_empty = "unidentified") %>%
-  aggregate_rare("Phylum", detection = 0.3, prevalence = 0.3)
-#  transform_sample_counts(function(x) x * 100)
+  mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', '')))
+  
+phylum_levels <- append(levels(factor(tax_table(ps)[,"Phylum"])), c("Other"))
 
-my_pal <- c(pal_simpsons("springfield")(16), pal_futurama("planetexpress")(4))
+ps <- ps %>%
+  tax_fix() %>%
+  tax_transform(trans = "compositional") %>%
+  transform_sample_counts(function(x) x * 100) %>%
+  tax_agg(rank = "Phylum", top_N = 25)
+
+my_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(9), "dimgray")
 
 taxa_plot <- plot_bar(ps,
                           x = "label", 
-                          fill="Phylum") +
-  #scale_x_discrete(labels = c(sample_data(ps)$label)) +
+                          fill="top") +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
@@ -185,7 +239,9 @@ taxa_plot <- plot_bar(ps,
   theme() +
   scale_fill_manual(values = my_pal) +
   guides(fill = guide_legend(ncol = 1))
-taxa_plot$data$Phylum <- factor(taxa_plot$data$Phylum, levels = phylum_levels)
+
+taxa_plot$data$top[taxa_plot$data$top %in% c("other", NA)] <- rep("Other", length(taxa_plot$data$top[taxa_plot$data$top %in% c("other", NA)]))
+taxa_plot$data$top <- factor(taxa_plot$data$top, levels = phylum_levels)
 taxa_plot$layers[[1]]$geom_params$width <- 1
 ```
 
@@ -212,7 +268,7 @@ zp1 <- shannon_plot +
     plot.margin = unit(c(1,1,-0.1,1), "lines"))
 
 zp2 <- observed_plot +
-  scale_y_continuous(limits = c(180, 1200),
+  scale_y_continuous(limits = c(100, 1200),
                      breaks = c(500, 1000)) +
   labs(y = "Richness") +
   theme(
@@ -230,8 +286,17 @@ zp3 <- taxa_plot +
        y = "Relative Abundance (%)",
        legend = "Phylum") +
   theme(strip.text.x = element_blank(),
+        axis.text.x = element_text(
+          colour = "black",
+          vjust = 0.5
+          ),
         legend.position = "bottom",
-        legend.spacing.x = unit(0.5, 'cm'),
+        legend.justification = "right",
+        legend.spacing.x = unit(0.7, 'cm'),
+        legend.text = element_text(
+          size = 9,
+          margin = margin(l = -0.5 , unit ="cm")
+          ),
         plot.margin = unit(c(-0.1,1,1,1), "lines"))
 
 zp <- ggarrange(zp1, zp2, zp3,
@@ -239,37 +304,26 @@ zp <- ggarrange(zp1, zp2, zp3,
           heights = c(0.32, 0.22, 1),
           align = "v")
 
-ggplot2::ggsave(zp, file = "./02_out/02_phyla_diversity.png", height = 8, width = 14)
+ggplot2::ggsave(zp, file = "./02_out/01_alpha_diversity.png", height = 8, width = 14)
 ```
 
+[Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)
+
 ```{r pub_fig_2, fig.height=6, fig.width=13}
-zp1 <- observed_plot +
-  scale_y_continuous(limits = c(100, 1400),
-                     breaks = c(500, 1000)) +
-  labs(title = "Catchy Graph Title A",
-       y = "OTUs") +
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(face = "italic"),
-        strip.text = element_text(size = 12),
-        plot.margin = unit(c(1,1,-0.1,1), "lines"))
-zp2 <- taxa_plot +
-  guides(fill = guide_legend(nrow = 2)) +
-  labs(x = "Sample",
-       y = "Relative Abundance",
-       legend = "Phylum") +
-  theme(strip.text.x = element_blank(),
-        legend.position = "bottom",
-        legend.spacing.x = unit(0.5, 'cm'),
-        plot.margin = unit(c(-0.1,1,1,1), "lines"))
-zp <- ggarrange(zp1, zp2,
-          nrow = 2,
-          heights = c(0.32,1),
-          align = "v")
-ggplot2::ggsave(zp, file = "./02_out/03_phyla_richness.png", height = 7, width = 14)
+zp <- rare_plot +
+  labs(title = "Catchy Rare Graph Title",
+        x = "Sample Size",
+        y = "Observed OTUs") +
+  scale_x_continuous(limits = c(0, 75000)) +
+  theme(strip.text.x = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = unit(c(1,1,1,1), "lines"))
+ggplot2::ggsave(zp, file = "./02_out/02_rare.png", height = 7, width = 14)
 ```
-```{r}
+
+[Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/02_rare.png)
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 ps <- ps_merge %>%
   transform_sample_counts(function(x) ((x * 100) / sum(x)))
 my_subset <- subset(t(otu_table(ps)), rownames(t(otu_table(ps))) %in% mag_asv)
@@ -277,4 +331,4 @@ ps_mag <- merge_phyloseq(my_subset, tax_table(ps), sample_data(ps), refseq(ps_16
 ```
 
 
-[Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)
+
