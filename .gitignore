@@ -50,7 +50,8 @@ rsconnect/
 
 #
 *~
-/01_data/00_input
-/01_data/02_trimmed
-/01_data/03_filtered
-/dadasnake
+/01_data/01_input
+/01_data/02_fastqc
+/01_data/03_trimmed
+/01_data/04_filtered
+/01_data/05_dadasnake
