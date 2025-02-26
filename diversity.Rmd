@@ -32,12 +32,13 @@ library(speedyseq)
 library(microViz)
 library(metagMisc)
 library(Biostrings)
-source_url("https://raw.githubusercontent.com/CGR-lab/barbecue/main/scripts/R/phyloseq.mate.R")
+library(phyloseq.mate)
 ```
 
 ## Introduction
 
 After cleaning and filtering using trimgalore, the 16S were processed using the standard [dada2 pipeline](https://benjjneb.github.io/dada2/tutorial.html) to create phyloseq objects of all ASVs. When rdp cannot reliably assign taxonomy (in this case down to Genus), levels below the lowest reliable assignment are designated NA.
+[Download link for sequence files and metadata.](01_data/01_input)
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
 ps_raw <- readRDS('./01_data/phyloseq_gtdb.Rds')
@@ -154,7 +155,9 @@ write.table(alpha_all,
 
 ```{r}
 ordcap = ordinate(ps_filter(ps_16S, GC != "NA"), "CAP", "bray", ~GC)
-plot_ordination(ps_16S, ordcap, "samples", color="soil")
+bray_plot <- plot_ordination(ps_16S, ordcap, "samples", color="soil")
+
+ggplot2::ggsave(bray_plot, file = "./02_out/03_bray.png", height = 8, width = 8)
 ```
 
 ```{r shannon, fig.height=4, fig.width=12}
@@ -224,9 +227,9 @@ ps <- ps %>%
   tax_fix() %>%
   tax_transform(trans = "compositional") %>%
   transform_sample_counts(function(x) x * 100) %>%
-  tax_agg(rank = "Phylum", top_N = 25)
+  tax_agg(rank = "Phylum", top_N = 24)
 
-my_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(9), "dimgray")
+my_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(8), "dimgray")
 
 taxa_plot <- plot_bar(ps,
                           x = "label", 
@@ -234,15 +237,50 @@ taxa_plot <- plot_bar(ps,
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
-  labs(fill = "Taxonomy (Phylum)",
+  labs(fill = "Taxonomy (Phylum)    ",
        y = "Relative Abundance (%)") +
   theme() +
   scale_fill_manual(values = my_pal) +
-  guides(fill = guide_legend(ncol = 1))
+  guides(fill = guide_legend(ncol = 1, byrow = TRUE))
 
 taxa_plot$data$top[taxa_plot$data$top %in% c("other", NA)] <- rep("Other", length(taxa_plot$data$top[taxa_plot$data$top %in% c("other", NA)]))
+taxa_plot$data$top <- str_pad(taxa_plot$data$top, 21, "right")
+phylum_levels <- str_pad(phylum_levels, 21, "right")
 taxa_plot$data$top <- factor(taxa_plot$data$top, levels = phylum_levels)
 taxa_plot$layers[[1]]$geom_params$width <- 1
+```
+
+```{r domain_relabund, fig.height=6, fig.width=20}
+ps <- ps_merge %>%
+  mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', '')))
+  
+domain_levels <- append(levels(factor(tax_table(ps)[,"Kingdom"])), c("Other"))
+
+ps <- ps %>%
+  tax_fix() %>%
+  tax_transform(trans = "compositional") %>%
+  transform_sample_counts(function(x) x * 100) %>%
+  tax_agg(rank = "Kingdom", top_N = 2)
+
+my_pal <- c(pal_simpsons("springfield")(2), "dimgray")
+
+taxa_plot_domain <- plot_bar(ps,
+                          x = "label", 
+                          fill="top") +
+  facet_wrap(~soil,
+             ncol = 4,
+             scales="free_x") +
+  labs(fill = "Taxonomy (Domain)    ",
+       y = "Relative Abundance (%)") +
+  theme() +
+  scale_fill_manual(values = my_pal) +
+  guides(fill = guide_legend(ncol = 1, byrow = TRUE))
+
+taxa_plot_domain$data$top[taxa_plot_domain$data$top %in% c("other", NA)] <- rep("Other", length(taxa_plot_domain$data$top[taxa_plot_domain$data$top %in% c("other", NA)]))
+taxa_plot_domain$data$top <- str_pad(taxa_plot_domain$data$top, 21, "right")
+domain_levels <- str_pad(domain_levels, 21, "right")
+taxa_plot_domain$data$top <- factor(taxa_plot_domain$data$top, levels = domain_levels)
+taxa_plot_domain$layers[[1]]$geom_params$width <- 1
 ```
 
 Filler
@@ -281,7 +319,7 @@ zp2 <- observed_plot +
     plot.margin = unit(c(1,1,-0.1,1), "lines"))
 
 zp3 <- taxa_plot +
-  guides(fill = guide_legend(nrow = 3)) +
+  guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
   labs(x = "",
        y = "Relative Abundance (%)",
        legend = "Phylum") +
@@ -292,10 +330,10 @@ zp3 <- taxa_plot +
           ),
         legend.position = "bottom",
         legend.justification = "right",
-        legend.spacing.x = unit(0.7, 'cm'),
+        legend.spacing.x = unit(0.5, 'cm'),
         legend.text = element_text(
           size = 9,
-          margin = margin(l = -0.5 , unit ="cm")
+          margin = margin(l = 0.1, unit ="cm")
           ),
         plot.margin = unit(c(-0.1,1,1,1), "lines"))
 
@@ -322,6 +360,60 @@ ggplot2::ggsave(zp, file = "./02_out/02_rare.png", height = 7, width = 14)
 ```
 
 [Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/02_rare.png)
+
+```{r pub_fig_s1, fig.height=5, fig.width=13}
+zp1 <- shannon_plot +
+  scale_y_continuous(limits = c(4.2, 6.8),
+                     breaks = c(5, 6)) +
+  labs(title = "Catchy Graph Title A",
+       y = "Shannon\ndiversity") +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 10),
+    strip.text = element_text(size = 12),
+    plot.margin = unit(c(1,1,-0.1,1), "lines"))
+
+zp2 <- observed_plot +
+  scale_y_continuous(limits = c(100, 1200),
+                     breaks = c(500, 1000)) +
+  labs(y = "Richness") +
+  theme(
+    title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 10),
+    strip.text = element_blank(),
+    plot.margin = unit(c(1,1,-0.1,1), "lines"))
+
+zp3 <- taxa_plot_domain +
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
+  labs(x = "",
+       y = "Relative Abundance (%)",
+       legend = "Phylum") +
+  theme(strip.text.x = element_blank(),
+        axis.text.x = element_text(
+          colour = "black",
+          vjust = 0.5
+          ),
+        legend.position = "bottom",
+        legend.justification = "right",
+        legend.spacing.x = unit(0.5, 'cm'),
+        legend.text = element_text(
+          size = 9,
+          margin = margin(l = 0.1, unit ="cm")
+          ),
+        plot.margin = unit(c(-0.1,1,1,1), "lines"))
+
+zp <- ggarrange(zp1, zp2, zp3,
+          nrow = 3,
+          heights = c(0.32, 0.22, 0.6),
+          align = "v")
+
+ggplot2::ggsave(zp, file = "./02_out/s1_alpha_diversity.png", height = 8, width = 14)
+```
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 ps <- ps_merge %>%
