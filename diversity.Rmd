@@ -16,7 +16,6 @@ link-citations: true
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(devtools)
 library(ggplot2)
 library(ggpubr)
 library(ggsci)
@@ -31,6 +30,7 @@ library(microbiome)
 library(speedyseq)
 library(microViz)
 library(metagMisc)
+library(PhyloMeasures)
 library(Biostrings)
 library(phyloseq.mate)
 ```
@@ -81,6 +81,13 @@ sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = samp
 ps_all <- subset_samples(ps_raw, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
 ps_merge <- subset_samples(ps_merge, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
 #ps_merge <- subset_samples(ps_merge, !label %in% c("GcArep1", "GcArep2", "GcArep3", "GcBrep1", "GcBrep2", "GcBrep3", "GcCrep1", "GcCrep2", "GcCrep3", "GcLrep1", "GcLrep2", "GcLrep3"))
+
+phyloseq_write_dataset(ps_all, "./01_data/06_tree/", "ps_all")
+
+asv_tree <- read_tree("01_data/06_tree/ps_all_ASVs.tre")
+ps_all <- merge_phyloseq(ps_all, asv_tree) %>%
+  phyloseq_root_tree()
+
 save(ps_all, ps_merge, file = "./01_data/phyloseq_all.Rdata")
 ```
 
@@ -138,6 +145,7 @@ rare_plot <- ggplot(rare) +
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
 alpha_all <- alpha(ps_all, index = "all")
+alpha_all$diversity_faith <- phyloseq_phylo_div(ps_all, measures = c("PD"))[,1]
 rownames(alpha_all) <- sample_data(ps_all)$name
 alpha_all$source <- sample_data(ps_all)$soil
 alpha_all$name <- sample_data(ps_all)$label
@@ -227,7 +235,7 @@ ps <- ps %>%
   tax_fix() %>%
   tax_transform(trans = "compositional") %>%
   transform_sample_counts(function(x) x * 100) %>%
-  tax_agg(rank = "Phylum", top_N = 24)
+  tax_agg(rank = "Phylum", top_N = 21)
 
 my_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(8), "dimgray")
 
@@ -260,7 +268,7 @@ ps <- ps %>%
   tax_fix() %>%
   tax_transform(trans = "compositional") %>%
   transform_sample_counts(function(x) x * 100) %>%
-  tax_agg(rank = "Kingdom", top_N = 2)
+  tax_agg(rank = "Kingdom", top_N = 24)
 
 my_pal <- c(pal_simpsons("springfield")(2), "dimgray")
 
