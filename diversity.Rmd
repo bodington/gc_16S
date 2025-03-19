@@ -42,32 +42,33 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
 ps_raw <- readRDS('./01_data/phyloseq_gtdb.Rds')
-set.seed(90210)
-ps_16S <- ps_raw %>%
-  rarefy_even_depth(sample.size = min(sample_sums(ps_raw))) %>%
-  tax_filter(min_sample_abundance = 2)
+
+rownames(otu_table(ps_raw)) <- replace(rownames(otu_table(ps_raw)), c(31, 42), c("LD_0", "CM_0"))
 
 sort_taxa <- read.csv("00_ref/GTDB_bac120_arc53_ssu_r207_clade_sort.csv", header = TRUE)
+
+#load(file = "./01_data/phyloseq_all.Rdata")
+
+#set.seed(90210)
+#ps_16S <- ps_raw %>%
+#  rarefy_even_depth(sample.size = min(sample_sums(ps_raw)))
+#  tax_filter(min_sample_abundance = 1)
 ```
 
 ```{r import_mag,  message=FALSE, warning=FALSE, include=FALSE}
-tax_merge <- merge_phyloseq(tax_table(ps_16S),tax_table(as.matrix(read.table(file = "01_data/gc_mag_tax.csv", header = TRUE, sep = ",", row.names = 1))))
+tax_merge <- merge_phyloseq(tax_table(ps_raw),tax_table(as.matrix(read.table(file = "01_data/gc_mag_tax.csv", header = TRUE, sep = ",", row.names = 1))))
 sample_data_merge <- sample_data(read.table(file = "00_ref/phyloseq_metadata.csv", header = TRUE, sep = ",", row.names = 1))
 
 otu_mag <- otu_table(round(as.matrix(read.table(file = "01_data/gc_mag_otu.csv", header = TRUE, sep = ",", row.names = 1))), taxa_are_rows = FALSE)
-otu_mag_merge_ps_16S <- otu_table(matrix(0, length(rownames(otu_mag)), ncol(otu_table(ps_16S)), dimname = list(rownames(otu_mag),colnames(otu_table(ps_16S)))), taxa_are_rows = FALSE)
-otu_ps_16S_merge_mag <- otu_table(matrix(0, length(rownames(otu_table(ps_16S))), ncol(otu_mag), dimname = list(rownames(otu_table(ps_16S)),colnames(otu_mag))), taxa_are_rows = FALSE)
-otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_16S), otu_mag_merge_ps_16S), merge_phyloseq(otu_ps_16S_merge_mag, otu_mag))
+otu_mag_merge_ps <- otu_table(matrix(0, length(rownames(otu_mag)), ncol(otu_table(ps_raw)), dimname = list(rownames(otu_mag),colnames(otu_table(ps_raw)))), taxa_are_rows = FALSE)
+otu_ps_merge_mag <- otu_table(matrix(0, length(rownames(otu_table(ps_raw))), ncol(otu_mag), dimname = list(rownames(otu_table(ps_raw)),colnames(otu_mag))), taxa_are_rows = FALSE)
+otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_raw), otu_mag_merge_ps), merge_phyloseq(otu_ps_merge_mag, otu_mag))
 
-ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge)
+ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge, refseq(ps_raw))
 
 ps_set <- subset_samples(ps_merge, sample %in% c("4.5_M5", "4.5_M11", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
 
 sample_names(ps_set) <- c("4.5_1", "4.5_20", "7.5_1", "7.5_20", "CM_1", "CM_20", "LD_1", "LD_20")
-sample_data(ps_set)$sample <- sample_names(ps_set)
-sample_data(ps_set)$name <- c("GcA1", "GcA20", "GcB1", "GcB20", "GcC1", "GcC20", "GcL1", "GcL20")
-sample_data(ps_set)$fraction <- c("1", "20", "1", "20", "1", "20", "1", "20")
-sample_data(ps_set)$label <- c("Fill1", "Fill2", "Fill3", "Fill4", "Fill5", "Fill6", "Fill7", "Fill8")
 
 ps_merge <- merge_phyloseq(ps_merge, ps_set)
 
@@ -78,22 +79,28 @@ ps_merge <- ps_arrange(ps_merge, name)
 sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 7.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
 sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = sample_data(ps_merge)$label)
 
-ps_all <- subset_samples(ps_raw, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
+ps_16S <- subset_samples(ps_merge, amplicon == 1)
+
 ps_merge <- subset_samples(ps_merge, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
-#ps_merge <- subset_samples(ps_merge, !label %in% c("GcArep1", "GcArep2", "GcArep3", "GcBrep1", "GcBrep2", "GcBrep3", "GcCrep1", "GcCrep2", "GcCrep3", "GcLrep1", "GcLrep2", "GcLrep3"))
 
-phyloseq_write_dataset(ps_all, "./01_data/06_tree/", "ps_all")
+phyloseq_write_dataset(ps_16S, "./01_data/06_tree/", "ps_16S")
 
-asv_tree <- read_tree("01_data/06_tree/ps_all_ASVs.tre")
-ps_all <- merge_phyloseq(ps_all, asv_tree) %>%
+#mafft --thread 8 ps_16S_ASVs.fasta > ps_16S_ASVs_aln.fasta
+#trimal -in ps_16S_ASVs_aln.fasta -out ps_16S_ASVs_aln_nogaps.fasta -gappyout
+#fasttree -nt -gtr -gamma ps_16S_ASVs_aln_nogaps.fasta > ps_16S_ASVs.tre
+
+asv_tree <- read_tree("01_data/06_tree/ps_16S_ASVs.tre")
+ps_16S <- merge_phyloseq(ps_16S, asv_tree) %>%
   phyloseq_root_tree()
 
-save(ps_all, ps_merge, file = "./01_data/phyloseq_all.Rdata")
+save(ps_16S, ps_merge, file = "./01_data/phyloseq_all.Rdata")
 ```
 
 ## Alpha Diversity
 ```{r rarefaction_curve, fig.height=8, fig.width=12}
-otu <- t(abundances(ps_all))
+ps <- ps_16S
+
+otu <- t(abundances(ps))
 rare_curve <- vegan::rarecurve(otu, step = 50)
 rare <- lapply(rare_curve, function(x){
   b <- as.data.frame(x)
@@ -144,11 +151,13 @@ rare_plot <- ggplot(rare) +
 
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
-alpha_all <- alpha(ps_all, index = "all")
-alpha_all$diversity_faith <- phyloseq_phylo_div(ps_all, measures = c("PD"))[,1]
-rownames(alpha_all) <- sample_data(ps_all)$name
-alpha_all$source <- sample_data(ps_all)$soil
-alpha_all$name <- sample_data(ps_all)$label
+ps <- ps_16S
+
+alpha_all <- alpha(ps, index = "all")
+alpha_all$diversity_faith <- phyloseq_phylo_div(ps, measures = c("PD"))[,1]
+rownames(alpha_all) <- sample_data(ps)$name
+alpha_all$source <- sample_data(ps)$soil
+alpha_all$name <- sample_data(ps)$label
 alpha_all <- alpha_all %>%
   relocate(source, name, .before = observed)
 
@@ -162,18 +171,49 @@ write.table(alpha_all,
 ```
 
 ```{r}
-ordcap = ordinate(ps_filter(ps_16S, GC != "NA"), "CAP", "bray", ~GC)
-bray_plot <- plot_ordination(ps_16S, ordcap, "samples", color="soil")
+ps <- ps_16S
 
-ggplot2::ggsave(bray_plot, file = "./02_out/03_bray.png", height = 8, width = 8)
+unifrac = ordinate(ps, "PCoA", "unifrac", ~GC)
+unifrac_plot <- plot_ordination(ps,
+                                  unifrac,
+                                  "samples",
+                                  color="soil") +
+  geom_label(
+    label = sample_data(ps)$name
+#    nudge_x=0.1,
+#    nudge_y=0.1
+  )
+
+
+ggplot2::ggsave(unifrac_plot, file = "./02_out/test_unifrac.png", height = 12, width = 12)
+```
+
+```{r}
+ps <- ps_16S
+
+bray = ordinate(ps, "NMDS", "bray")
+bray_plot <- plot_ordination(ps,
+                                  bray,
+                                  "samples",
+                                  color="soil") + 
+  geom_label(
+    label = sample_data(ps)$name
+#    nudge_x=0.1,
+#    nudge_y=0.1
+  )
+
+
+ggplot2::ggsave(bray_plot, file = "./02_out/test_bray.png", height = 12, width = 12)
 ```
 
 ```{r shannon, fig.height=4, fig.width=12}
-shannon_plot <- plot_richness(ps_merge,
+ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+
+shannon_plot <- plot_richness(ps,
                                   x = 'label',
                                   measures=c("Shannon"),
                                   title = "Shannon Diversity of Soil Community Fractions") +
-  scale_x_discrete(labels = c(sample_data(ps_merge)$label)) +
+  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
@@ -187,11 +227,12 @@ shannon_plot <- plot_richness(ps_merge,
 
 
 ```{r observed, fig.height=4, fig.width=12}
-observed_plot <- plot_richness(ps_merge,
+ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+observed_plot <- plot_richness(ps,
                                   x = 'label',
                                   measures=c("Observed"),
                                   title = "Observed Richness of Soil Community Fractions") +
-  scale_x_discrete(labels = c(sample_data(ps_merge)$label)) +
+  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
@@ -207,10 +248,10 @@ observed_plot <- plot_richness(ps_merge,
 
 ```{r gtdb_relabund}
 #phylum_levels <- append(sort_taxa$Phylum[nzchar(sort_taxa$Phylum)], c("Unassigned", "Other"))
+ps <- ps_merge
 
 
-
-write.table(ps_all %>%
+write.table(ps %>%
               tax_fix() %>%
               tax_transform(trans = "compositional", rank = "Phylum") %>%
               psmelt() %>%
@@ -227,6 +268,7 @@ write.table(ps_all %>%
 
 ```{r phylum_relabund, fig.height=6, fig.width=20}
 ps <- ps_merge %>%
+  subset_samples(!sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13")) %>%
   mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', '')))
   
 phylum_levels <- append(levels(factor(tax_table(ps)[,"Phylum"])), c("Other"))
@@ -256,6 +298,8 @@ taxa_plot$data$top <- str_pad(taxa_plot$data$top, 21, "right")
 phylum_levels <- str_pad(phylum_levels, 21, "right")
 taxa_plot$data$top <- factor(taxa_plot$data$top, levels = phylum_levels)
 taxa_plot$layers[[1]]$geom_params$width <- 1
+
+ggsave(taxa_plot, file = "./02_out/test_alpha.png", height = 8, width = 16)
 ```
 
 ```{r domain_relabund, fig.height=6, fig.width=20}
