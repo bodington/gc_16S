@@ -43,11 +43,11 @@ After cleaning and filtering using trimgalore, the 16S were processed using the 
 ```{r ps_objects, message=FALSE, warning=FALSE, include=FALSE}
 ps_raw <- readRDS('./01_data/phyloseq_gtdb.Rds')
 
-#rownames(otu_table(ps_raw)) <- replace(rownames(otu_table(ps_raw)), c(31, 42), c("LD_0", "CM_0"))
+load(file = "./01_data/phyloseq_all.Rdata")
 
 sort_taxa <- read.csv("00_ref/GTDB_bac120_arc53_ssu_r207_clade_sort.csv", header = TRUE)
 
-load(file = "./01_data/phyloseq_all.Rdata")
+#rownames(otu_table(ps_raw)) <- replace(rownames(otu_table(ps_raw)), c(31, 42), c("LD_0", "CM_0"))
 
 #set.seed(90210)
 #ps_16S <- ps_raw %>%
@@ -77,7 +77,7 @@ sample_data(ps_merge) <- sample_data(read.table(file = "00_ref/phyloseq_metadata
 sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
 ps_merge <- ps_arrange(ps_merge, name)
 sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 7.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
-sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = sample_data(ps_merge)$label)
+sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = unique(sample_data(ps_merge)$label))
 
 ps_16S <- subset_samples(ps_merge, amplicon == 1) %>%
   merge_phyloseq(refseq(ps_raw))
@@ -171,57 +171,21 @@ write.table(alpha_all,
             )
 ```
 
-```{r}
-ps <- ps_16S
-
-unifrac = ordinate(ps, "PCoA", "unifrac", ~GC)
-unifrac_plot <- plot_ordination(ps,
-                                  unifrac,
-                                  "samples",
-                                  color="soil")
-# geom_label(
-#   label = sample_data(ps)$name
-#    nudge_x=0.1,
-#    nudge_y=0.1
-# )
-
-
-ggplot2::ggsave(unifrac_plot, file = "./02_out/test_unifrac.png", height = 12, width = 12)
-```
-
-```{r}
-ps <- ps_16S
-
-bray = ordinate(ps, "NMDS", "bray")
-bray_plot <- plot_ordination(ps,
-                                  bray,
-                                  "samples",
-                                  color="soil")
-# geom_label(
-#   label = sample_data(ps)$name
-#    nudge_x=0.1,
-#    nudge_y=0.1
-# )
-
-
-ggplot2::ggsave(bray_plot, file = "./02_out/test_bray.png", height = 12, width = 12)
-```
-
 ```{r shannon, fig.height=4, fig.width=12}
 ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
 
 shannon_plot <- plot_richness(ps,
                                   x = 'label',
-                                  measures=c("Shannon"),
-                                  title = "Shannon Diversity of Soil Community Fractions") +
-  scale_x_discrete(labels = c(sample_data(ps)$label)) +
+                                  measures=c("Shannon")
+                                  ) +
+#  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
   scale_color_npg() +
   guides(colour = "none") +
   labs(x = "",
-       y = "Shannon Diversity") +
+       y = "Shannon\ndiversity") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = -90))
 ```
@@ -229,11 +193,12 @@ shannon_plot <- plot_richness(ps,
 
 ```{r observed, fig.height=4, fig.width=12}
 ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+
 observed_plot <- plot_richness(ps,
                                   x = 'label',
                                   measures=c("Observed"),
-                                  title = "Observed Richness of Soil Community Fractions") +
-  scale_x_discrete(labels = c(sample_data(ps)$label)) +
+                                  ) +
+#  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
              scales="free_x") +
@@ -245,12 +210,31 @@ observed_plot <- plot_richness(ps,
   theme(axis.text.x = element_text(angle = -90))
 ```
 
+```{r unifrac}
+ps <- ps_16S
+
+unifrac = ordinate(ps, "PCoA", "unifrac", ~GC)
+unifrac_plot <- plot_ordination(ps,
+                  unifrac,
+                  "samples",
+                  color = "source",
+                  shape = "fractioned"
+                  ) +
+                  theme_bw() +
+                  labs(
+                    color = "Soil",
+                    shape = "Fraction"
+                  ) +
+                  geom_point(size = 4)
+
+ggplot2::ggsave(unifrac_plot, file = "./02_out/test_unifrac.png", height = 5, width = 6)
+```
+
 ## Community Composition
 
 ```{r gtdb_relabund}
 #phylum_levels <- append(sort_taxa$Phylum[nzchar(sort_taxa$Phylum)], c("Unassigned", "Other"))
 ps <- ps_merge
-
 
 write.table(ps %>%
               tax_fix() %>%
@@ -267,9 +251,8 @@ write.table(ps %>%
             )
 ```
 
-```{r fractions_relabund, fig.height=6, fig.width=20}
+```{r phylum_relabund, fig.height=6, fig.width=20}
 ps <- ps_merge %>%
-  subset_samples(!sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13")) %>%
   filter_taxa2(~ sum(. > 0) > 0) %>%
   mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', ''))) %>%
   subset_taxa(Kingdom != "")
@@ -282,18 +265,27 @@ ps <- ps %>%
   transform_sample_counts(function(x) x * 100) %>%
   tax_agg(rank = "Phylum", top_N = 23)
 
-my_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(8), "dimgray")
+ps_frac <- subset_samples(ps, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+#ps_frac <- subset_samples(ps, !sample %in% c("4.5_1", "4.5_20", "4.5_M5", "4.5_M11", "7.5_1", "7.5_20", "7.5_M4", "7.5_M14", "CM_1", "CM_20", "CM_M5", "CM_M11", "LD_1", "LD_20", "LD_M4", "LD_M13"))
 
-frac_taxa_plot <- plot_bar(ps,
+ps_mag <- subset_samples(ps, sample %in% c("4.5_M5", "4.5_M11", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
+
+relabund_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(8), "dimgray")
+```
+
+```{r frac_relabund, fig.height=6, fig.width=20}
+frac_taxa_plot <- plot_bar(ps_frac,
                           x = "label", 
                           fill="top") +
+#  scale_x_discrete(labels = c(sample_data(ps_frac)$label)) +
   facet_wrap(~soil,
              ncol = 4,
-             scales="free_x") +
+             scales="free_x"
+             ) +
   labs(fill = "Taxonomy (Phylum)    ",
        y = "Relative Abundance (%)") +
   theme() +
-  scale_fill_manual(values = my_pal) +
+  scale_fill_manual(values = relabund_pal) +
   guides(fill = guide_legend(ncol = 1, byrow = TRUE))
 
 frac_taxa_plot$data$top[frac_taxa_plot$data$top %in% c("other", NA)] <- rep("Other", length(frac_taxa_plot$data$top[frac_taxa_plot$data$top %in% c("other", NA)]))
@@ -305,47 +297,27 @@ frac_taxa_plot$layers[[1]]$geom_params$width <- 1
 ggsave(frac_taxa_plot, file = "./02_out/test_frac_relabund.png", height = 8, width = 16)
 ```
 
-
-```{r mags_relabund, fig.height=6, fig.width=20}
-ps <- ps_merge %>%
-  subset_samples(sample %in% c("4.5_M5", "4.5_M11", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13")) %>%
-  filter_taxa2(~ sum(. > 0) > 0) %>%
-  mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', ''))) %>%
-  subset_taxa(Kingdom != "")
-
-domain_levels <- append(levels(factor(tax_table(ps)[,"Kingdom"])), c("Other"))
-
-ps <- ps %>%
-  tax_fix() %>%
-  tax_transform(trans = "compositional") %>%
-  transform_sample_counts(function(x) x * 100) %>%
-  tax_agg(rank = "Kingdom", top_N = 2)
-
-my_pal <- c(pal_simpsons("springfield")(16)[c(13,7)])
-
-mag_taxa_plot <- plot_bar(ps,
+```{r mag_relabund, fig.height=6, fig.width=20}
+mag_taxa_plot <- plot_bar(ps_mag,
                           x = "label", 
                           fill="top") +
-#  facet_wrap(~soil,
-#             ncol = 4,
-#             scales="free_x") +
-  coord_flip() +
-  scale_y_reverse() +
-  labs(fill = "Domain",
-    x = "MAG",
-    y = "Relative Abundance (%)"
-    ) +
+  facet_wrap(~source,
+             ncol = 4,
+             scales="free_x"
+             ) +
+  labs(fill = "Taxonomy (Phylum)    ",
+       y = "Relative Abundance (%)") +
   theme() +
-  scale_fill_manual(values = my_pal) +
+  scale_fill_manual(values = relabund_pal) +
   guides(fill = guide_legend(ncol = 1, byrow = TRUE))
 
 mag_taxa_plot$data$top[mag_taxa_plot$data$top %in% c("other", NA)] <- rep("Other", length(mag_taxa_plot$data$top[mag_taxa_plot$data$top %in% c("other", NA)]))
 mag_taxa_plot$data$top <- str_pad(mag_taxa_plot$data$top, 21, "right")
-domain_levels <- str_pad(domain_levels, 21, "right")
-mag_taxa_plot$data$top <- factor(mag_taxa_plot$data$top, levels = domain_levels)
+phylum_levels <- str_pad(phylum_levels, 21, "right")
+mag_taxa_plot$data$top <- factor(mag_taxa_plot$data$top, levels = phylum_levels)
 mag_taxa_plot$layers[[1]]$geom_params$width <- 1
 
-ggsave(mag_taxa_plot, file = "./02_out/test_mag_relabund.png", height = 6, width = 6)
+ggsave(mag_taxa_plot, file = "./02_out/test_mag_relabund.png", height = 8, width = 8)
 ```
 
 Filler
@@ -360,8 +332,7 @@ Download links below plot
 ap1 <- shannon_plot +
   scale_y_continuous(limits = c(4.2, 6.8),
                      breaks = c(5, 6)) +
-  labs(title = "Catchy Graph Title A",
-       y = "Shannon\ndiversity") +
+  labs(title = "a") +
   theme(
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
@@ -400,20 +371,33 @@ ap3 <- frac_taxa_plot +
           size = 9,
           margin = margin(l = 0.1, unit ="cm")
           ),
-        plot.margin = unit(c(-0.1,1,1,1), "lines"))
+        plot.margin = unit(c(-0.1,1,1,1), "lines")
+        )
 
 ap <- ggarrange(ap1, ap2, ap3,
           nrow = 3,
           heights = c(0.32, 0.22, 1),
           align = "v")
 
-bp1 <- unifrac_plot
+bp1 <- unifrac_plot +
+  labs(title = "b")
 
-bp2 <- mag_taxa_plot
+bp2 <- mag_taxa_plot +
+  labs(title = "c",
+        x = "",
+        y = "Relative Abundance (%)"
+  ) +
+  theme(axis.text.x = element_text(
+          colour = "black",
+          vjust = 0.5
+        ),
+        legend.position = "none",
+        plot.margin = unit(c(-0.1,1,1,1), "lines")
+    )  
 
-bp <- ggarrange(bp1, bp2,
-          ncol = 2,
-          widths = c(1, 0.6),
+bp <- ggarrange(bp1, NULL, bp2,
+          ncol = 3,
+          widths = c(0.6, 0.1, 0.6),
           align = "h")
 
 zp <- ggarrange(ap, bp,
