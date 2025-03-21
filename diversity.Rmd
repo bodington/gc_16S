@@ -45,8 +45,15 @@ ps_raw <- readRDS('./01_data/phyloseq_gtdb.Rds')
 
 load(file = "./01_data/phyloseq_all.Rdata")
 
-sort_taxa <- read.csv("00_ref/GTDB_bac120_arc53_ssu_r207_clade_sort.csv", header = TRUE)
+## Labels for plots
+labels_soil <- c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 7.5)", "GcC (Corsemaul)", "GcL (Lower Dell)")
+names(labels_soil) <- c("GcA", "GcB", "GcC", "GcL")
 
+labels_fractioned <- c("0", "1")
+names(labels_fractioned) <- c("Whole", "Fraction")
+
+
+## Used code snippets
 #rownames(otu_table(ps_raw)) <- replace(rownames(otu_table(ps_raw)), c(31, 42), c("LD_0", "CM_0"))
 
 #set.seed(90210)
@@ -74,10 +81,17 @@ ps_merge <- merge_phyloseq(ps_merge, ps_set)
 
 sample_data(ps_merge) <- sample_data(read.table(file = "00_ref/phyloseq_metadata.csv", header = TRUE, sep = ",", row.names = 1))
 
+
+## Set factors for sample data and sort by name (for plot label sorting)
 sample_data(ps_merge)$name <- factor(sample_data(ps_merge)$name, levels = str_sort(sample_data(ps_merge)$name, numeric = TRUE))
 ps_merge <- ps_arrange(ps_merge, name)
-sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil, levels = c("GcA (Craibstone pH 4.5)", "GcB (Craibstone pH 7.5)", "GcC (Corsemaul)", "GcL (Lower Dell)"))
 sample_data(ps_merge)$label <- factor(sample_data(ps_merge)$label, levels = unique(sample_data(ps_merge)$label))
+sample_data(ps_merge)$soil <- factor(sample_data(ps_merge)$soil)
+sample_data(ps_merge)$amplicon <- factor(sample_data(ps_merge)$amplicon)
+sample_data(ps_merge)$fractioned <- factor(sample_data(ps_merge)$fractioned)
+sample_data(ps_merge)$fraction_no <- factor(sample_data(ps_merge)$fraction_no)
+
+
 
 ps_16S <- subset_samples(ps_merge, amplicon == 1) %>%
   merge_phyloseq(refseq(ps_raw))
@@ -178,10 +192,11 @@ shannon_plot <- plot_richness(ps,
                                   x = 'label',
                                   measures=c("Shannon")
                                   ) +
-#  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
-             scales="free_x") +
+             scales="free_x",
+             labeller = labeller(soil = labels_soil)
+             ) +
   scale_color_npg() +
   guides(colour = "none") +
   labs(x = "",
@@ -198,10 +213,11 @@ observed_plot <- plot_richness(ps,
                                   x = 'label',
                                   measures=c("Observed"),
                                   ) +
-#  scale_x_discrete(labels = c(sample_data(ps)$label)) +
   facet_wrap(~soil,
              ncol = 4,
-             scales="free_x") +
+             scales="free_x",
+             labeller = labeller(soil = labels_soil)
+             ) +
   scale_color_npg() +
   guides(colour = "none") +
   labs(x = "",
@@ -217,7 +233,7 @@ unifrac = ordinate(ps, "PCoA", "unifrac", ~GC)
 unifrac_plot <- plot_ordination(ps,
                   unifrac,
                   "samples",
-                  color = "source",
+                  color = "soil",
                   shape = "fractioned"
                   ) +
                   theme_bw() +
@@ -225,6 +241,7 @@ unifrac_plot <- plot_ordination(ps,
                     color = "Soil",
                     shape = "Fraction"
                   ) +
+                  scale_shape_discrete(name = "Fraction", labels = names(labels_fractioned)) +
                   geom_point(size = 4)
 
 ggplot2::ggsave(unifrac_plot, file = "./02_out/test_unifrac.png", height = 5, width = 6)
@@ -277,10 +294,10 @@ relabund_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui(
 frac_taxa_plot <- plot_bar(ps_frac,
                           x = "label", 
                           fill="top") +
-#  scale_x_discrete(labels = c(sample_data(ps_frac)$label)) +
   facet_wrap(~soil,
              ncol = 4,
-             scales="free_x"
+             scales="free_x",
+             labeller = labeller(soil = labels_soil)
              ) +
   labs(fill = "Taxonomy (Phylum)    ",
        y = "Relative Abundance (%)") +
@@ -301,7 +318,7 @@ ggsave(frac_taxa_plot, file = "./02_out/test_frac_relabund.png", height = 8, wid
 mag_taxa_plot <- plot_bar(ps_mag,
                           x = "label", 
                           fill="top") +
-  facet_wrap(~source,
+  facet_wrap(~soil,
              ncol = 4,
              scales="free_x"
              ) +
