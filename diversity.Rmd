@@ -98,13 +98,13 @@ ps_16S <- subset_samples(ps_merge, amplicon == 1) %>%
 
 ps_merge <- subset_samples(ps_merge, !sample %in% c("4.5_0.1", "4.5_0.2", "4.5_0.3", "7.5_0.1", "7.5_0.2", "7.5_0.3", "CM_0.1", "CM_0.2", "CM_0.3", "LD_0.1", "LD_0.2", "LD_0.3"))
 
-phyloseq_write_dataset(ps_16S, "./01_data/06_tree/", "ps_16S")
+phyloseq_write_dataset(ps_16S, "./01_data/06_working/", "ps_16S")
 
 #mafft --thread 8 ps_16S_ASVs.fasta > ps_16S_ASVs_aln.fasta
 #trimal -in ps_16S_ASVs_aln.fasta -out ps_16S_ASVs_aln_nogaps.fasta -gappyout
 #fasttree -nt -gtr -gamma ps_16S_ASVs_aln_nogaps.fasta > ps_16S_ASVs.tre
 
-asv_tree <- read_tree("01_data/06_tree/ps_16S_ASVs.tre")
+asv_tree <- read_tree("01_data/06_working/ps_16S_ASV.tre")
 ps_16S <- merge_phyloseq(ps_16S, asv_tree) %>%
   phyloseq_root_tree()
 
@@ -112,6 +112,9 @@ save(ps_16S, ps_merge, file = "./01_data/phyloseq_all.Rdata")
 ```
 
 ## Alpha Diversity
+
+
+
 ```{r rarefaction_curve, fig.height=8, fig.width=12}
 ps <- ps_16S
 
@@ -164,12 +167,17 @@ rare_plot <- ggplot(rare) +
         )
 ```
 
+```{r novelty}
+novel_asvs <- alpha(prune_taxa(colnames(otu_table(ps_16S)) %in% readLines("./01_data/06_working/ps_16S_ASV_novel.list"), ps_16S), index = "observed")/alpha(ps_16S, index = "observed")
+sample_data(ps_16S) <- merge_phyloseq(sample_data(ps_16S), sample_data(novel_asvs %>% rename("observed" = "novel")))
+```
 
 ```{r alpha_16S, fig.height=8, fig.width=12}
 ps <- ps_16S
 
 alpha_all <- alpha(ps, index = "all")
 alpha_all$diversity_faith <- phyloseq_phylo_div(ps, measures = c("PD"))[,1]
+alpha_all$asv_novelty <- sample_data(ps_16S)$novel
 rownames(alpha_all) <- sample_data(ps)$name
 alpha_all$source <- sample_data(ps)$soil
 alpha_all$name <- sample_data(ps)$label
