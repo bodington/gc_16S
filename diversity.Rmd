@@ -64,7 +64,7 @@ otu_merge <- merge_phyloseq(merge_phyloseq(otu_table(ps_raw), otu_mag_merge_ps),
 
 ps_merge <- phyloseq(otu_merge, sample_data_merge, tax_merge)
 
-ps_set <- subset_samples(ps_merge, sample %in% c("4.5_M5", "4.5_M11", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
+ps_set <- subset_samples(ps_merge, sample %in% c("4.5_M5", "4.5_M13", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
 
 sample_names(ps_set) <- c("4.5_1", "4.5_20", "7.5_1", "7.5_20", "CM_1", "CM_20", "LD_1", "LD_20")
 
@@ -189,7 +189,7 @@ write.table(alpha_all,
 ```
 
 ```{r shannon, fig.height=4, fig.width=12}
-ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M13", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
 
 shannon_plot <- plot_richness(ps,
                                   x = 'label',
@@ -205,13 +205,13 @@ shannon_plot <- plot_richness(ps,
   labs(x = "",
        y = "Shannon\ndiversity") +
   theme_bw(
-    axis.text.x = element_text(angle = -90)
+#    axis.text.x = element_text(angle = -90)
     )
 ```
 
 
 ```{r observed, fig.height=4, fig.width=12}
-ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+ps <- subset_samples(ps_merge, !sample %in% c("4.5_20", "4.5_M5", "4.5_M13", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
 
 observed_plot <- plot_richness(ps,
                                   x = 'label',
@@ -227,7 +227,7 @@ observed_plot <- plot_richness(ps,
   labs(x = "",
        y = "Richness") +
   theme_bw(
-    axis.text.x = element_text(angle = -90)
+#    axis.text.x = element_text(angle = -90)
     )
 ```
 
@@ -294,10 +294,10 @@ ps <- ps %>%
   transform_sample_counts(function(x) x * 100) %>%
   tax_agg(rank = "Phylum", top_N = 24)
 
-ps_frac <- subset_samples(ps, !sample %in% c("4.5_20", "4.5_M5", "4.5_M11", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
-#ps_frac <- subset_samples(ps, !sample %in% c("4.5_1", "4.5_20", "4.5_M5", "4.5_M11", "7.5_1", "7.5_20", "7.5_M4", "7.5_M14", "CM_1", "CM_20", "CM_M5", "CM_M11", "LD_1", "LD_20", "LD_M4", "LD_M13"))
+ps_frac <- subset_samples(ps, !sample %in% c("4.5_20", "4.5_M5", "4.5_M13", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+#ps_frac <- subset_samples(ps, !sample %in% c("4.5_1", "4.5_20", "4.5_M5", "4.5_M13", "7.5_1", "7.5_20", "7.5_M4", "7.5_M14", "CM_1", "CM_20", "CM_M5", "CM_M11", "LD_1", "LD_20", "LD_M4", "LD_M13"))
 
-ps_mag <- subset_samples(ps, sample %in% c("4.5_M5", "4.5_M11", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
+ps_mag <- subset_samples(ps, sample %in% c("4.5_M5", "4.5_M13", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
 
 relabund_pal <- c(pal_simpsons("springfield")(16)[-5], "steelblue2", pal_flatui("default")(8)[-5], "dimgray")
 ```
@@ -349,7 +349,7 @@ mag_taxa_plot <- plot_bar(ps_mag,
     ) +
   labs(
     fill = "Taxonomy (Phylum)    ",
-    y = "Relative Abundance (%)"
+    y = "Proportion of genomes (%)"
     ) +
   scale_fill_manual(
     values = relabund_pal
@@ -374,6 +374,100 @@ mag_taxa_plot$layers[[1]]$geom_params$width <- 1
 ggsave(mag_taxa_plot, file = "./02_out/test_mag_relabund.png", height = 8, width = 8)
 ```
 
+```{r domain_relabund, fig.height=6, fig.width=20}
+ps <- ps_merge %>%
+  filter_taxa2(~ sum(. > 0) > 0) %>%
+  mutate_tax_table(across(everything(), \(x) str_replace(x,'_[A-Z]', ''))) %>%
+  subset_taxa(Kingdom != "")
+
+domain_levels <- c("Archaea", "Bacteria", "Other")
+
+ps <- ps %>%
+  tax_fix() %>%
+  tax_transform(trans = "compositional") %>%
+  transform_sample_counts(function(x) x * 100) %>%
+  tax_agg(rank = "Kingdom", top_N = 2)
+
+ps_frac_domain <- subset_samples(ps, !sample %in% c("4.5_20", "4.5_M5", "4.5_M13", "7.5_20", "7.5_M4", "7.5_M14", "CM_20", "CM_M5", "CM_M11", "LD_20", "LD_M4", "LD_M13"))
+#ps_frac <- subset_samples(ps, !sample %in% c("4.5_1", "4.5_20", "4.5_M5", "4.5_M13", "7.5_1", "7.5_20", "7.5_M4", "7.5_M14", "CM_1", "CM_20", "CM_M5", "CM_M11", "LD_1", "LD_20", "LD_M4", "LD_M13"))
+
+ps_mag_domain <- subset_samples(ps, sample %in% c("4.5_M5", "4.5_M13", "7.5_M4", "7.5_M14", "CM_M5", "CM_M11", "LD_M4", "LD_M13"))
+
+relabund_pal_domain <- c(pal_simpsons("springfield")(16)[1:2], "dimgray")
+```
+
+```{r frac_relabund_domain, fig.height=6, fig.width=20}
+frac_taxa_plot_domain <- plot_bar(ps_frac_domain,
+                          x = "label", 
+                          fill="top") +
+  facet_wrap(
+    ~soil,
+    ncol = 4,
+    scales="free_x",
+    labeller = labeller(soil = labels_soil)
+    ) +
+  labs(
+    fill = "Taxonomy (Domain)",
+    y = "Relative Abundance (%)"
+    ) +
+  scale_fill_manual(
+    values = relabund_pal_domain
+    ) +
+  guides(
+    fill = guide_legend(
+      ncol = 1,
+      byrow = TRUE)
+    ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = -90)
+    )
+
+#frac_taxa_plot_domain$data$top[frac_taxa_plot_domain$data$top %in% c("Bacteria Kingdom", "other", NA)] <- rep("Other", length(frac_taxa_plot_domain$data$top[frac_taxa_plot_domain$data$top %in% c("Bacteria Kingdom", "other", NA)]))
+frac_taxa_plot_domain$data$top <- str_pad(frac_taxa_plot_domain$data$top, 21, "right")
+domain_levels <- str_pad(domain_levels, 21, "right")
+frac_taxa_plot_domain$data$top <- factor(frac_taxa_plot_domain$data$top, levels = domain_levels)
+frac_taxa_plot_domain$layers[[1]]$geom_params$width <- 1
+
+ggsave(frac_taxa_plot_domain, file = "./02_out/test_frac_relabund_domain.png", height = 8, width = 16)
+```
+
+```{r mag_relabund_domain, fig.height=6, fig.width=20}
+mag_taxa_plot_domain <- plot_bar(ps_mag_domain,
+                          x = "label", 
+                          fill="top") +
+  facet_wrap(
+    ~soil,
+    ncol = 4,
+    scales="free_x"
+    ) +
+  labs(
+    fill = "Taxonomy (Domain)    ",
+    y = "Proportion of genomes (%)"
+    ) +
+  scale_fill_manual(
+    values = relabund_pal_domain
+    ) +
+  guides(
+    fill = guide_legend(
+      ncol = 1,
+      byrow = TRUE
+      )
+    ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = -90)
+    )
+
+#mag_taxa_plot_domain$data$top[mag_taxa_plot_domain$data$top %in% c("Bacteria Kingdom", "other", NA)] <- rep("Other", length(mag_taxa_plot_domain$data$top[mag_taxa_plot_domain$data$top %in% c("Bacteria Kingdom", "other", NA)]))
+mag_taxa_plot_domain$data$top <- str_pad(mag_taxa_plot_domain$data$top, 21, "right")
+domain_levels <- str_pad(domain_levels, 21, "right")
+mag_taxa_plot_domain$data$top <- factor(mag_taxa_plot_domain$data$top, levels = domain_levels)
+mag_taxa_plot_domain$layers[[1]]$geom_params$width <- 1
+
+ggsave(mag_taxa_plot_domain, file = "./02_out/test_mag_relabund_domain.png", height = 8, width = 8)
+```
+
 Filler
 
 ## Plots for publication
@@ -382,7 +476,7 @@ Download links below plot
 
 ### Fig 1
 
-```{r pub_fig_1, fig.height=6, fig.width=13}
+```{r pub_fig_1, fig.height=14, fig.width=14}
 ap1 <- shannon_plot +
   scale_y_continuous(limits = c(4.2, 6.8),
                      breaks = c(5, 6)) +
@@ -455,7 +549,7 @@ bp1 <- unifrac_plot +
 bp2 <- mag_taxa_plot +
   labs(title = "c",
         x = "",
-        y = "Relative Abundance (%)"
+        y = "Proportion of genomes (%)"
   ) +
   theme(axis.text.x = element_text(
           colour = "black",
@@ -476,6 +570,7 @@ zp <- ggarrange(ap, bp,
           align = "v")
 
 ggplot2::ggsave(zp, file = "./02_out/01_diversity.png", height = 14, width = 14)
+ggplot2::ggsave(zp, file = "./02_out/01_diversity.tif", height = 14, width = 14, device='tiff', dpi=300)
 ```
 
 [Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/01_alpha_diversity.png)
@@ -494,7 +589,104 @@ ggplot2::ggsave(zp, file = "./02_out/02_rare.png", height = 7, width = 14)
 
 [Download this plot.](https://github.com/bodington/gc_16S/raw/main/02_out/02_rare.png)
 
-```{r pub_fig_s1, fig.height=5, fig.width=13}
+```{r pub_fig_1_s1, fig.height=14, fig.width=14}
+ap1 <- shannon_plot +
+  scale_y_continuous(limits = c(4.2, 6.8),
+                     breaks = c(5, 6)) +
+  labs(title = "a") +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 10),
+    strip.text = element_text(size = 12),
+    plot.margin = unit(c(1,1,-0.1,1), "lines"))
+
+ap2 <- observed_plot +
+  scale_y_continuous(limits = c(100, 1300),
+                     breaks = c(500, 1000)) +
+  labs(y = "Richness") +
+  theme(
+    title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 10),
+    strip.text = element_blank(),
+    plot.margin = unit(c(-0.1,1,-0.1,1), "lines"))
+
+ap3 <- frac_taxa_plot_domain +
+  guides(
+    fill = guide_legend(
+      nrow = 1,
+      byrow = TRUE
+      )
+    ) +
+  labs(
+    x = "",
+    y = "Relative Abundance (%)"
+    ) +
+  theme(
+    strip.text.x = element_blank(),
+    axis.text.x = element_text(
+      size = 8,
+      colour = "black",
+      vjust = 0.5
+      ),
+    legend.position = "bottom",
+    legend.title = element_text(size = 14),
+    legend.title.position = "top",
+    legend.title.align = 0.5,
+    legend.justification = "centre",
+    legend.spacing.x = unit(0.5, 'cm'),
+    legend.margin = margin(0.1,1,1,1),
+    legend.text = element_text(size = 10),
+    plot.margin = unit(c(-0.1,1,1,1), "lines")
+    )
+
+ap <- ggarrange(ap1, ap2, ap3,
+          nrow = 3,
+          heights = c(0.32, 0.22, 1),
+          align = "v")
+
+bp1 <- unifrac_plot +
+  labs(title = "b") +
+  theme(
+    plot.margin = margin(
+      l = 0.5,
+      b = 0.5,
+      unit = "cm"
+    )
+  )
+
+bp2 <- mag_taxa_plot_domain +
+  labs(title = "c",
+        x = "",
+        y = "Proportion of genomes (%)"
+  ) +
+  theme(axis.text.x = element_text(
+          colour = "black",
+          vjust = 0.5
+        ),
+        legend.position = "none",
+        plot.margin = unit(c(-0.1,1,1,1), "lines")
+    )  
+
+bp <- ggarrange(bp1, NULL, bp2,
+          ncol = 3,
+          widths = c(0.72, 0.1, 0.6),
+          align = "h")
+
+zp <- ggarrange(ap, bp,
+          nrow = 2,
+          heights = c(1, 0.8),
+          align = "v")
+
+ggplot2::ggsave(zp, file = "./02_out/s1_diversity.png", height = 14, width = 14)
+ggplot2::ggsave(zp, file = "./02_out/s1_diversity.tif", height = 14, width = 14, device='tiff', dpi=300)
+```
+
+```{r pub_fig_s1_old, fig.height=5, fig.width=13}
 zp1 <- shannon_plot +
   scale_y_continuous(limits = c(4.2, 6.8),
                      breaks = c(5, 6)) +
